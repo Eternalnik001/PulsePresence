@@ -33,7 +33,7 @@ Automatic cinematic transformation. When a wicket falls or a six is hit, the UI 
 
 ---
 
-## 🏗️ Technical Architecture (Senior Dev View)
+## 🏗️ Technical Architecture 
 
 PulsePresence is designed for high-concurrency "Flash Events" common in live sports.
 
