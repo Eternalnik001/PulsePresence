@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#000000" />
+  <title>PulsePresence — Be Inside The Game</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- ============================================================
+     INTRO — Cinematic, sets the tone
+============================================================ -->
+<div class="intro" id="intro">
+  <div class="intro-card">
+    <div class="intro-eyebrow">A SECOND-SCREEN EXPERIENCE FOR LIVE CRICKET</div>
+    <div class="intro-logo">PULSE<span class="intro-logo-amp">·</span>PRESENCE</div>
+    <div class="intro-line"></div>
+    <div class="intro-tagline" id="intro-tagline">
+      Don't watch the match. <em>Be inside it.</em>
+    </div>
+
+    <div class="intro-match" id="intro-match-block">
+      <div class="intro-match-label">TONIGHT</div>
+      <div class="intro-match-teams" id="intro-match-teams">Loading...</div>
+      <div class="intro-match-venue" id="intro-match-venue">—</div>
+    </div>
+
+    <div class="intro-pillars">
+      <div class="pillar">
+        <div class="pillar-icon">◉</div>
+        <div class="pillar-text">
+          <div class="pillar-title">Match Director</div>
+          <div class="pillar-sub">AI narrates the match for <em>you</em></div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">▲</div>
+        <div class="pillar-text">
+          <div class="pillar-title">Co-Captain Mode</div>
+          <div class="pillar-sub">Make the call before the captain does</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">≈</div>
+        <div class="pillar-text">
+          <div class="pillar-title">Stadium Wave</div>
+          <div class="pillar-sub">Synchronized moments with all viewers</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">✦</div>
+        <div class="pillar-text">
+          <div class="pillar-title">Key-Moment Theatre</div>
+          <div class="pillar-sub">The screen reacts to what just happened</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="intro-ai" id="intro-ai">Checking AI...</div>
+
+    <div class="intro-team-pick">
+      <div class="intro-team-pick-label">PICK YOUR SIDE</div>
+      <div class="intro-team-buttons" id="intro-team-buttons">
+        <button class="team-pick-btn" data-team="rcb">
+          <span class="team-pick-color rcb-color"></span>
+          <span>RCB</span>
+        </button>
+        <button class="team-pick-btn" data-team="csk">
+          <span class="team-pick-color csk-color"></span>
+          <span>CSK</span>
+        </button>
+        <button class="team-pick-btn" data-team="neutral">
+          <span class="team-pick-color neutral-color"></span>
+          <span>NEUTRAL</span>
+        </button>
+      </div>
+    </div>
+
+    <button class="intro-cta" id="intro-cta" onclick="enterStadium()" disabled>
+      <span>ENTER THE STADIUM</span>
+      <span class="intro-cta-arrow">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN APP
+============================================================ -->
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="header">
+    <div class="header-row">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        <span>PULSE</span><span class="logo-dim">·</span><span>PRESENCE</span>
+      </div>
+      <div class="header-meta">
+        <span class="meta-dot live-dot"></span>
+        <span class="meta-text" id="header-presence">847,231 inside</span>
+      </div>
+    </div>
+
+    <!-- Match Scoreboard -->
+    <div class="scoreboard">
+      <div class="sb-team sb-team-bat">
+        <div class="sb-team-name" id="sb-bat-name">—</div>
+        <div class="sb-team-score" id="sb-bat-score">0/0</div>
+        <div class="sb-team-overs" id="sb-bat-overs">0.0 ov</div>
+      </div>
+      <div class="sb-divider">
+        <div class="sb-vs">vs</div>
+        <div class="sb-meta" id="sb-meta">Live · 1st Innings</div>
+      </div>
+      <div class="sb-team sb-team-bowl">
+        <div class="sb-team-name" id="sb-bowl-name">—</div>
+        <div class="sb-team-score" id="sb-bowl-score">yet to bat</div>
+        <div class="sb-team-overs" id="sb-bowl-overs">—</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       PILLAR 1 — AI MATCH DIRECTOR
+  ============================================================ -->
+  <section class="director">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>MATCH DIRECTOR</span>
+      <span class="section-label-tag" id="director-source">GPT</span>
+    </div>
+    <div class="director-card">
+      <div class="director-avatar">
+        <div class="director-avatar-ring"></div>
+        <div class="director-avatar-core">◉</div>
+      </div>
+      <div class="director-content">
+        <div class="director-narrative" id="director-text">
+          Welcome. The match is about to begin. I'll narrate the story as it unfolds — for you, your team, your moment.
+        </div>
+        <div class="director-meta">
+          <span class="director-meta-item">
+            <span class="director-meta-key">CHAPTER</span>
+            <span class="director-meta-val" id="director-chapter">PROLOGUE</span>
+          </span>
+          <span class="director-meta-item">
+            <span class="director-meta-key">YOUR TEAM</span>
+            <span class="director-meta-val" id="director-team">—</span>
+          </span>
+          <span class="director-meta-item">
+            <span class="director-meta-key">EMOTION</span>
+            <span class="director-meta-val" id="director-emotion">ANTICIPATION</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PRESENCE PULSE (bi-directional — different from v1)
+       Shows what *millions* are feeling right now, and how YOU are
+       contributing to it.
+  ============================================================ -->
+  <section class="presence">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>COLLECTIVE PULSE</span>
+      <span class="section-label-tag">847K LIVE</span>
+    </div>
+    <div class="presence-card">
+      <div class="presence-globe" id="presence-globe">
+        <svg viewBox="0 0 200 200" class="presence-svg">
+          <circle cx="100" cy="100" r="80" class="presence-ring presence-ring-1"/>
+          <circle cx="100" cy="100" r="60" class="presence-ring presence-ring-2"/>
+          <circle cx="100" cy="100" r="40" class="presence-ring presence-ring-3"/>
+          <circle cx="100" cy="100" r="20" class="presence-ring presence-ring-4"/>
+          <circle cx="100" cy="100" r="6" class="presence-core" id="presence-core"/>
+        </svg>
+      </div>
+      <div class="presence-stats">
+        <div class="presence-stat">
+          <div class="presence-stat-label">JOY</div>
+          <div class="presence-stat-bar"><div class="presence-stat-fill" id="pulse-joy" style="width:30%; background:#fbbf24"></div></div>
+        </div>
+        <div class="presence-stat">
+          <div class="presence-stat-label">TENSION</div>
+          <div class="presence-stat-bar"><div class="presence-stat-fill" id="pulse-tension" style="width:45%; background:#ef4444"></div></div>
+        </div>
+        <div class="presence-stat">
+          <div class="presence-stat-label">HOPE</div>
+          <div class="presence-stat-bar"><div class="presence-stat-fill" id="pulse-hope" style="width:60%; background:#10b981"></div></div>
+        </div>
+        <div class="presence-stat">
+          <div class="presence-stat-label">DISBELIEF</div>
+          <div class="presence-stat-bar"><div class="presence-stat-fill" id="pulse-disbelief" style="width:15%; background:#a855f7"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PILLAR 2 — CO-CAPTAIN MODE
+       Tactical decisions BEFORE captain makes them
+  ============================================================ -->
+  <section class="captain">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>CO-CAPTAIN</span>
+      <span class="section-label-tag" id="captain-status">STANDBY</span>
+    </div>
+    <div class="captain-card" id="captain-card">
+      <div class="captain-empty">
+        <div class="captain-empty-icon">▲</div>
+        <div class="captain-empty-text">Tactical decisions appear between overs. Make your call before the captain does.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       LIVE FEED — Each ball as it happens (cinematic)
+  ============================================================ -->
+  <section class="feed">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>LIVE FEED</span>
+      <span class="section-label-tag" id="feed-ball-meta">0.0</span>
+    </div>
+    <div class="feed-card">
+      <div class="feed-current" id="feed-current">Match starting...</div>
+      <div class="feed-strip" id="feed-strip"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PILLAR 3 — STADIUM WAVE (synchronized tap)
+  ============================================================ -->
+  <section class="wave">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>STADIUM WAVE</span>
+      <span class="section-label-tag" id="wave-status">DORMANT</span>
+    </div>
+    <div class="wave-card" id="wave-card">
+      <div class="wave-prompt" id="wave-prompt">
+        When a big moment hits, hold to join the wave.<br/>
+        <span class="wave-prompt-sub">Synchronized with everyone watching.</span>
+      </div>
+      <div class="wave-orb" id="wave-orb">
+        <div class="wave-orb-ring"></div>
+        <div class="wave-orb-ring wave-orb-ring-2"></div>
+        <div class="wave-orb-core" id="wave-orb-core">
+          <span id="wave-orb-text">HOLD</span>
+        </div>
+      </div>
+      <div class="wave-participation">
+        <div class="wave-bar"><div class="wave-fill" id="wave-fill" style="width:0%"></div></div>
+        <div class="wave-stats">
+          <span><strong id="wave-count">0</strong> joined</span>
+          <span class="wave-threshold">Wave triggers at <strong>50%</strong></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FAN SENTIMENT — what your team's fans are FEELING
+       (qualitatively, not as a counter)
+  ============================================================ -->
+  <section class="sentiment">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>WHAT THE STANDS ARE SAYING</span>
+    </div>
+    <div class="sentiment-feed" id="sentiment-feed"></div>
+  </section>
+
+  <!-- ============================================================
+       ASK THE DIRECTOR (AI chat — context-aware)
+  ============================================================ -->
+  <section class="ask">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>ASK THE DIRECTOR</span>
+      <span class="section-label-tag">GPT</span>
+    </div>
+    <div class="ask-card">
+      <div class="ask-body" id="ask-body">
+        <div class="ask-msg ask-msg-ai">Ask me anything as the match unfolds. <em>Why did he change the field? What's at stake here? Who is this player?</em></div>
+      </div>
+      <div class="ask-input">
+        <input type="text" id="ask-input" placeholder="What's on your mind?" />
+        <button onclick="askDirector()" id="ask-send">ASK</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============================================================
+     BOTTOM CONTROL
+============================================================ -->
+<div class="control-bar">
+  <div class="control-row">
+    <div class="speed-btns">
+      <button class="speed-btn" data-speed="2200">1x</button>
+      <button class="speed-btn active" data-speed="900">3x</button>
+      <button class="speed-btn" data-speed="400">8x</button>
+    </div>
+    <button class="play-btn" id="play-btn">▶ PLAY</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     KEY MOMENT THEATRE OVERLAY (Pillar 4)
+     Appears on six/wicket/big moments
+============================================================ -->
+<div class="theatre" id="theatre">
+  <div class="theatre-backdrop"></div>
+  <div class="theatre-content">
+    <div class="theatre-tag" id="theatre-tag">KEY MOMENT</div>
+    <div class="theatre-headline" id="theatre-headline">SIX!</div>
+    <div class="theatre-subhead" id="theatre-subhead">over deep midwicket</div>
+    <div class="theatre-context" id="theatre-context">
+      AI is analyzing the moment...
+    </div>
+    <div class="theatre-reactions">
+      <button class="theatre-react" data-emoji="🔥">🔥</button>
+      <button class="theatre-react" data-emoji="🤯">🤯</button>
+      <button class="theatre-react" data-emoji="👏">👏</button>
+      <button class="theatre-react" data-emoji="💔">💔</button>
+      <button class="theatre-react" data-emoji="🙏">🙏</button>
+    </div>
+    <div class="theatre-collective" id="theatre-collective">
+      <div class="theatre-collective-label">2.4M FANS REACTED</div>
+      <div class="theatre-collective-bar" id="theatre-collective-bar"></div>
+    </div>
+    <button class="theatre-close" onclick="closeTheatre()">Continue watching →</button>
+  </div>
+</div>
+
+<!-- Overlays -->
+<div class="toast" id="toast"></div>
+<div class="emoji-burst" id="emoji-burst"></div>
+
+<!-- ============================================================
+     Scripts — strict load order
+============================================================ -->
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/director.js"></script>
+<script src="js/captain.js"></script>
+<script src="js/wave.js"></script>
+<script src="js/theatre.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

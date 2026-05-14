@@ -1,0 +1,3430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#000000" />
+  <title>PulsePresence — Be Inside The Game</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet" />
+
+  <style>
+/* ============================================================
+   PulsePresence — Stylesheet
+   Aesthetic: cinematic broadcast, deep blacks, single accent.
+   Different from PulseIPL (which was neon arcade).
+============================================================ */
+
+:root {
+  /* Palette — cinematic, restrained, single accent */
+  --bg-0: #000000;
+  --bg-1: #0a0a0a;
+  --bg-2: #141414;
+  --bg-3: #1c1c1c;
+  --ink: #f5f5f5;
+  --ink-dim: #a3a3a3;
+  --ink-faint: #525252;
+  --ink-ghost: #2a2a2a;
+
+  /* The single accent — broadcast amber */
+  --accent: #ff9d2e;
+  --accent-2: #ffb84d;
+  --accent-glow: rgba(255, 157, 46, 0.4);
+
+  /* Team colors (used sparingly) */
+  --rcb: #e8133b;
+  --csk: #fbd14a;
+  --neutral: #94a3b8;
+
+  /* Emotion colors */
+  --joy: #fbbf24;
+  --tension: #ef4444;
+  --hope: #10b981;
+  --disbelief: #a855f7;
+
+  /* Lines */
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --line-strong: rgba(255, 255, 255, 0.22);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  background: var(--bg-0);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 100% 50% at 50% 0%, rgba(255, 157, 46, 0.05), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 157, 46, 0.03), transparent 70%),
+    var(--bg-0);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Subtle film grain */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='5'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.08 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+}
+
+.app {
+  max-width: 440px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 5;
+  padding: 0 0 120px;
+}
+
+/* ============================================================
+   SECTION LABEL (used everywhere)
+============================================================ */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 20px 10px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 700;
+}
+.section-label-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  display: inline-block;
+}
+.section-label-tag {
+  margin-left: auto;
+  padding: 2px 6px;
+  background: var(--ink-ghost);
+  color: var(--ink-dim);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.75));
+  border-bottom: 1px solid var(--line);
+  padding: 14px 20px 14px;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.logo-dim { color: var(--accent); }
+
+.logo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow), 0 0 16px var(--accent-glow);
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-dim);
+  letter-spacing: 0.1em;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+/* SCOREBOARD */
+.scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.sb-team {
+  display: flex;
+  flex-direction: column;
+}
+.sb-team-bowl { align-items: flex-end; }
+
+.sb-team-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  color: var(--ink-dim);
+}
+
+.sb-team-score {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.sb-team-overs {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.1em;
+  margin-top: 2px;
+}
+
+.sb-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+}
+
+.sb-vs {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+.sb-meta {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   MATCH DIRECTOR (AI narrative)
+============================================================ */
+.director {
+  padding: 0;
+}
+
+.director-card {
+  margin: 0 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 157, 46, 0.08), rgba(255, 157, 46, 0.02));
+  border: 1px solid rgba(255, 157, 46, 0.2);
+  border-radius: 4px;
+  display: flex;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.director-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--accent), transparent);
+}
+
+.director-avatar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.director-avatar-ring {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  animation: directorRing 3s ease-in-out infinite;
+}
+
+@keyframes directorRing {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 0.2; }
+}
+
+.director-avatar-core {
+  position: absolute;
+  inset: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.director-content { flex: 1; min-width: 0; }
+
+.director-narrative {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink);
+  font-weight: 400;
+  margin-bottom: 14px;
+  min-height: 48px;
+}
+
+.director-narrative em { color: var(--accent); font-style: italic; }
+.director-narrative strong { color: var(--accent); font-weight: 700; font-family: 'Inter', sans-serif; font-style: normal; }
+
+.director-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.director-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.director-meta-key {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.director-meta-val {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.director-loading {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--accent);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   PRESENCE (collective emotion)
+============================================================ */
+.presence-card {
+  margin: 0 20px;
+  padding: 20px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.presence-globe {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+
+.presence-svg { width: 100%; height: 100%; }
+
+.presence-ring {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1;
+  opacity: 0.3;
+  transform-origin: center;
+  animation: presencePulse 3s ease-in-out infinite;
+}
+.presence-ring-2 { animation-delay: 0.3s; }
+.presence-ring-3 { animation-delay: 0.6s; }
+.presence-ring-4 { animation-delay: 0.9s; }
+
+@keyframes presencePulse {
+  0%, 100% { transform: scale(1); opacity: 0.2; }
+  50% { transform: scale(1.08); opacity: 0.6; }
+}
+
+.presence-core {
+  fill: var(--accent);
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+
+.presence-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.presence-stat {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.presence-stat-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--ink-dim);
+}
+
+.presence-stat-bar {
+  height: 4px;
+  background: var(--ink-ghost);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.presence-stat-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* ============================================================
+   CO-CAPTAIN (tactical decisions)
+============================================================ */
+.captain-card {
+  margin: 0 20px;
+  padding: 20px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  min-height: 120px;
+}
+
+.captain-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 0;
+  text-align: center;
+  color: var(--ink-faint);
+}
+
+.captain-empty-icon {
+  font-size: 24px;
+  color: var(--ink-ghost);
+}
+
+.captain-empty-text {
+  font-size: 12px;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+.captain-prompt {
+  animation: captainIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes captainIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.captain-question {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 17px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.captain-context {
+  font-size: 11px;
+  color: var(--ink-dim);
+  margin-bottom: 14px;
+  letter-spacing: 0.02em;
+}
+
+.captain-options {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.captain-option {
+  padding: 12px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  border-radius: 4px;
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.captain-option:hover {
+  border-color: var(--line-strong);
+  background: var(--bg-3);
+}
+
+.captain-option.picked {
+  border-color: var(--accent);
+  background: rgba(255, 157, 46, 0.08);
+}
+
+.captain-option.actual {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: var(--hope);
+}
+
+.captain-option-label {
+  position: relative;
+  z-index: 2;
+}
+
+.captain-option-pct {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.captain-option.revealed .captain-option-pct { opacity: 1; }
+
+.captain-option-bar {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  background: rgba(255, 157, 46, 0.12);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.captain-option.actual .captain-option-bar {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.captain-result {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--ink-dim);
+  line-height: 1.5;
+}
+
+.captain-result strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.captain-result-correct {
+  color: var(--hope);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   LIVE FEED (commentary, ball history)
+============================================================ */
+.feed-card {
+  margin: 0 20px;
+  padding: 18px 20px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.feed-current {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  min-height: 48px;
+  font-weight: 400;
+}
+
+.feed-ball {
+  display: inline-block;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--ink-ghost);
+  color: var(--ink-dim);
+  margin-right: 8px;
+  vertical-align: middle;
+  font-style: normal;
+}
+.feed-ball.six { background: var(--accent); color: #000; }
+.feed-ball.four { background: var(--hope); color: #000; }
+.feed-ball.wicket { background: var(--tension); color: #fff; }
+
+.feed-strip {
+  display: flex;
+  gap: 4px;
+  margin-top: 14px;
+  padding: 8px 0 4px;
+  overflow-x: auto;
+  border-top: 1px solid var(--line);
+}
+.feed-strip::-webkit-scrollbar { display: none; }
+
+.feed-chip {
+  flex-shrink: 0;
+  min-width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  background: var(--bg-2);
+  color: var(--ink-faint);
+  border-radius: 2px;
+  border: 1px solid var(--line);
+  padding: 0 4px;
+}
+.feed-chip.c4 { background: var(--hope); color: #000; border-color: var(--hope); }
+.feed-chip.c6 { background: var(--accent); color: #000; border-color: var(--accent); }
+.feed-chip.cW { background: var(--tension); color: #fff; border-color: var(--tension); }
+
+/* ============================================================
+   STADIUM WAVE
+============================================================ */
+.wave-card {
+  margin: 0 20px;
+  padding: 24px 20px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.wave-card.active {
+  background: linear-gradient(180deg, rgba(255, 157, 46, 0.08), rgba(255, 157, 46, 0.02));
+  border-color: rgba(255, 157, 46, 0.3);
+}
+
+.wave-prompt {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--ink-dim);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.wave-prompt-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.1em;
+}
+
+.wave-orb {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.wave-orb-ring {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: waveRingPulse 2s ease-in-out infinite;
+}
+
+.wave-orb-ring-2 {
+  inset: -12px;
+  animation-delay: 0.5s;
+  opacity: 0.2;
+}
+
+@keyframes waveRingPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.1); opacity: 0.1; }
+}
+
+.wave-orb-core {
+  position: absolute;
+  inset: 12px;
+  background: radial-gradient(circle, var(--accent) 0%, #c97720 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  color: #000;
+  transition: transform 0.15s ease;
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+
+.wave-orb:active .wave-orb-core {
+  transform: scale(0.92);
+}
+
+.wave-orb.holding .wave-orb-core {
+  animation: waveHold 0.6s ease-in-out infinite;
+}
+
+@keyframes waveHold {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 30px var(--accent-glow); }
+  50% { transform: scale(1.05); box-shadow: 0 0 50px var(--accent-glow), 0 0 80px var(--accent-glow); }
+}
+
+.wave-participation {
+  margin-top: 4px;
+}
+
+.wave-bar {
+  height: 3px;
+  background: var(--ink-ghost);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.wave-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.wave-stats {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-dim);
+  letter-spacing: 0.08em;
+}
+
+.wave-stats strong { color: var(--accent); font-weight: 700; }
+
+.wave-threshold { color: var(--ink-faint); }
+
+/* Ripple effect when wave triggers */
+.wave-ripple {
+  position: fixed;
+  pointer-events: none;
+  z-index: 100;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+}
+
+.wave-ripple.fire {
+  animation: waveRippleAnim 2.5s ease-out forwards;
+}
+
+.wave-ripple-circle {
+  width: 100px;
+  height: 100px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+}
+
+@keyframes waveRippleAnim {
+  0% { opacity: 1; transform: scale(0.2); }
+  100% { opacity: 0; transform: scale(15); }
+}
+
+/* ============================================================
+   SENTIMENT FEED (qualitative, NOT counter)
+============================================================ */
+.sentiment-feed {
+  margin: 0 20px;
+  padding: 14px 16px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  height: 180px;
+  overflow: hidden;
+  position: relative;
+}
+
+.sentiment-msg {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  animation: sentimentIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+@keyframes sentimentIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sentiment-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sentiment-avatar.rcb { background: var(--rcb); color: #fff; }
+.sentiment-avatar.csk { background: var(--csk); color: #000; }
+.sentiment-avatar.neutral { background: var(--neutral); color: #000; }
+
+.sentiment-body { flex: 1; min-width: 0; }
+
+.sentiment-from {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  margin-right: 6px;
+  text-transform: uppercase;
+}
+
+.sentiment-text {
+  color: var(--ink);
+  font-style: italic;
+}
+
+/* ============================================================
+   ASK THE DIRECTOR (chat)
+============================================================ */
+.ask-card {
+  margin: 0 20px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ask-body {
+  padding: 14px 16px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.ask-msg {
+  margin-bottom: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ask-msg-ai {
+  color: var(--ink);
+  position: relative;
+  padding-left: 16px;
+}
+
+.ask-msg-ai::before {
+  content: '◉';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-size: 11px;
+}
+
+.ask-msg-ai em { color: var(--ink-dim); font-style: italic; }
+
+.ask-msg-user {
+  text-align: right;
+  color: var(--ink-dim);
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.ask-input {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+
+.ask-input input {
+  flex: 1;
+  background: var(--bg-2);
+  border: none;
+  padding: 12px 14px;
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+}
+
+.ask-input input::placeholder { color: var(--ink-faint); }
+
+.ask-input button {
+  padding: 12px 20px;
+  background: var(--accent);
+  border: none;
+  color: #000;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+}
+
+/* ============================================================
+   CONTROL BAR
+============================================================ */
+.control-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.95));
+  border-top: 1px solid var(--line-2);
+  padding: 12px 20px 28px;
+}
+
+.control-row {
+  max-width: 440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.speed-btns { display: flex; gap: 6px; }
+
+.speed-btn {
+  padding: 7px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink-dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.speed-btn.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+
+.play-btn {
+  padding: 10px 22px;
+  background: var(--accent);
+  border: none;
+  border-radius: 3px;
+  color: #000;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+/* ============================================================
+   KEY MOMENT THEATRE
+============================================================ */
+.theatre {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.theatre.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.theatre-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+}
+
+.theatre-content {
+  position: relative;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  z-index: 2;
+  animation: theatreIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes theatreIn {
+  from { opacity: 0; transform: scale(0.85) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.theatre-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.theatre-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 96px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 8px;
+  text-shadow: 0 0 40px var(--accent-glow);
+}
+
+.theatre.six .theatre-headline { color: var(--accent); }
+.theatre.wicket .theatre-headline { color: var(--tension); text-shadow: 0 0 40px rgba(239, 68, 68, 0.5); }
+.theatre.four .theatre-headline { color: var(--hope); text-shadow: 0 0 40px rgba(16, 185, 129, 0.5); }
+
+.theatre-subhead {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--ink-dim);
+  margin-bottom: 24px;
+}
+
+.theatre-context {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 2px solid var(--accent);
+  border-radius: 2px;
+  margin-bottom: 20px;
+  text-align: left;
+  min-height: 60px;
+}
+
+.theatre-context strong { color: var(--accent); }
+.theatre-context em { color: var(--ink-dim); font-style: italic; }
+
+.theatre-reactions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.theatre-react {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line-2);
+  font-size: 22px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theatre-react:hover { transform: scale(1.15); border-color: var(--accent); }
+.theatre-react:active { transform: scale(0.9); }
+
+.theatre-collective {
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+
+.theatre-collective-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+
+.theatre-collective-bar {
+  display: flex;
+  gap: 2px;
+  height: 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.theatre-collective-segment {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--ink-faint);
+  background: var(--bg-2);
+}
+
+.theatre-close {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--line-2);
+  color: var(--ink-dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.theatre-close:hover { color: var(--ink); border-color: var(--line-strong); }
+
+/* ============================================================
+   INTRO (the cinematic opening)
+============================================================ */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--bg-0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.intro::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 157, 46, 0.12), transparent 70%),
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(255, 157, 46, 0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.intro.hide {
+  animation: introOut 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes introOut {
+  to { opacity: 0; transform: scale(1.05); }
+}
+
+.intro-card {
+  position: relative;
+  max-width: 400px;
+  width: 100%;
+  padding: 32px 28px;
+  text-align: center;
+  animation: introIn 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes introIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.intro-eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+}
+
+.intro-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 44px;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.intro-logo-amp { color: var(--accent); }
+
+.intro-line {
+  width: 30px;
+  height: 1px;
+  background: var(--accent);
+  margin: 18px auto 18px;
+}
+
+.intro-tagline {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--ink-dim);
+  margin-bottom: 28px;
+  line-height: 1.4;
+}
+
+.intro-tagline em {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.intro-match {
+  padding: 16px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  margin-bottom: 24px;
+}
+
+.intro-match-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.intro-match-teams {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.intro-match-venue {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+}
+
+.intro-pillars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.pillar {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.pillar-icon {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.pillar-text { flex: 1; }
+
+.pillar-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+
+.pillar-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--ink-dim);
+  line-height: 1.4;
+}
+
+.pillar-sub em { color: var(--accent); font-style: italic; }
+
+.intro-ai {
+  padding: 8px;
+  border-radius: 3px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  margin-bottom: 20px;
+}
+
+.intro-ai.on {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--hope);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.intro-ai.off {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--tension);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.intro-team-pick {
+  margin-bottom: 20px;
+}
+
+.intro-team-pick-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+}
+
+.intro-team-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.team-pick-btn {
+  padding: 10px 8px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s ease;
+}
+
+.team-pick-btn:hover { border-color: var(--line-strong); }
+
+.team-pick-btn.picked {
+  border-color: var(--accent);
+  background: rgba(255, 157, 46, 0.08);
+}
+
+.team-pick-color {
+  width: 20px;
+  height: 4px;
+  border-radius: 100px;
+}
+.rcb-color { background: var(--rcb); }
+.csk-color { background: var(--csk); }
+.neutral-color { background: var(--neutral); }
+
+.intro-cta {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  border: none;
+  border-radius: 3px;
+  color: #000;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 32px var(--accent-glow);
+}
+
+.intro-cta:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px var(--accent-glow);
+}
+
+.intro-cta:disabled {
+  background: var(--bg-2);
+  color: var(--ink-faint);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.intro-cta-arrow {
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.intro-cta:hover:not(:disabled) .intro-cta-arrow {
+  transform: translateX(4px);
+}
+
+/* ============================================================
+   TOAST (small notification)
+============================================================ */
+.toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  z-index: 400;
+  padding: 10px 18px;
+  background: var(--accent);
+  color: #000;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  border-radius: 3px;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 8px 24px var(--accent-glow);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============================================================
+   EMOJI BURST (in-theatre reactions, also generic)
+============================================================ */
+.emoji-burst {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+}
+
+.floating-emoji {
+  position: absolute;
+  font-size: 28px;
+  animation: emojiFloat 2.4s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes emojiFloat {
+  0% { opacity: 0; transform: translateY(0) scale(0.5); }
+  15% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+  100% { opacity: 0; transform: translateY(-260px) scale(0.8); }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     INTRO — Cinematic, sets the tone
+============================================================ -->
+<div class="intro" id="intro">
+  <div class="intro-card">
+    <div class="intro-eyebrow">A SECOND-SCREEN EXPERIENCE FOR LIVE CRICKET</div>
+    <div class="intro-logo">PULSE<span class="intro-logo-amp">·</span>PRESENCE</div>
+    <div class="intro-line"></div>
+    <div class="intro-tagline" id="intro-tagline">
+      Don't watch the match. <em>Be inside it.</em>
+    </div>
+
+    <div class="intro-match" id="intro-match-block">
+      <div class="intro-match-label">TONIGHT</div>
+      <div class="intro-match-teams" id="intro-match-teams">Loading...</div>
+      <div class="intro-match-venue" id="intro-match-venue">—</div>
+    </div>
+
+    <div class="intro-pillars">
+      <div class="pillar">
+        <div class="pillar-icon">◉</div>
+        <div class="pillar-text">
+          <div class="pillar-title">Match Director</div>
+          <div class="pillar-sub">AI narrates the match for <em>you</em></div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">▲</div>
+        <div class="pillar-text">
+          <div class="pillar-title">Co-Captain Mode</div>
+          <div class="pillar-sub">Make the call before the captain does</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">≈</div>
+        <div class="pillar-text">
+          <div class="pillar-title">Stadium Wave</div>
+          <div class="pillar-sub">Synchronized moments with all viewers</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">✦</div>
+        <div class="pillar-text">
+          <div class="pillar-title">Key-Moment Theatre</div>
+          <div class="pillar-sub">The screen reacts to what just happened</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="intro-ai" id="intro-ai">Checking AI...</div>
+
+    <div class="intro-team-pick">
+      <div class="intro-team-pick-label">PICK YOUR SIDE</div>
+      <div class="intro-team-buttons" id="intro-team-buttons">
+        <button class="team-pick-btn" data-team="rcb">
+          <span class="team-pick-color rcb-color"></span>
+          <span>RCB</span>
+        </button>
+        <button class="team-pick-btn" data-team="csk">
+          <span class="team-pick-color csk-color"></span>
+          <span>CSK</span>
+        </button>
+        <button class="team-pick-btn" data-team="neutral">
+          <span class="team-pick-color neutral-color"></span>
+          <span>NEUTRAL</span>
+        </button>
+      </div>
+    </div>
+
+    <button class="intro-cta" id="intro-cta" onclick="enterStadium()" disabled>
+      <span>ENTER THE STADIUM</span>
+      <span class="intro-cta-arrow">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN APP
+============================================================ -->
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="header">
+    <div class="header-row">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        <span>PULSE</span><span class="logo-dim">·</span><span>PRESENCE</span>
+      </div>
+      <div class="header-meta">
+        <span class="meta-dot live-dot"></span>
+        <span class="meta-text" id="header-presence">847,231 inside</span>
+      </div>
+    </div>
+
+    <!-- Match Scoreboard -->
+    <div class="scoreboard">
+      <div class="sb-team sb-team-bat">
+        <div class="sb-team-name" id="sb-bat-name">—</div>
+        <div class="sb-team-score" id="sb-bat-score">0/0</div>
+        <div class="sb-team-overs" id="sb-bat-overs">0.0 ov</div>
+      </div>
+      <div class="sb-divider">
+        <div class="sb-vs">vs</div>
+        <div class="sb-meta" id="sb-meta">Live · 1st Innings</div>
+      </div>
+      <div class="sb-team sb-team-bowl">
+        <div class="sb-team-name" id="sb-bowl-name">—</div>
+        <div class="sb-team-score" id="sb-bowl-score">yet to bat</div>
+        <div class="sb-team-overs" id="sb-bowl-overs">—</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       PILLAR 1 — AI MATCH DIRECTOR
+  ============================================================ -->
+  <section class="director">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>MATCH DIRECTOR</span>
+      <span class="section-label-tag" id="director-source">GPT</span>
+    </div>
+    <div class="director-card">
+      <div class="director-avatar">
+        <div class="director-avatar-ring"></div>
+        <div class="director-avatar-core">◉</div>
+      </div>
+      <div class="director-content">
+        <div class="director-narrative" id="director-text">
+          Welcome. The match is about to begin. I'll narrate the story as it unfolds — for you, your team, your moment.
+        </div>
+        <div class="director-meta">
+          <span class="director-meta-item">
+            <span class="director-meta-key">CHAPTER</span>
+            <span class="director-meta-val" id="director-chapter">PROLOGUE</span>
+          </span>
+          <span class="director-meta-item">
+            <span class="director-meta-key">YOUR TEAM</span>
+            <span class="director-meta-val" id="director-team">—</span>
+          </span>
+          <span class="director-meta-item">
+            <span class="director-meta-key">EMOTION</span>
+            <span class="director-meta-val" id="director-emotion">ANTICIPATION</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PRESENCE PULSE (bi-directional — different from v1)
+       Shows what *millions* are feeling right now, and how YOU are
+       contributing to it.
+  ============================================================ -->
+  <section class="presence">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>COLLECTIVE PULSE</span>
+      <span class="section-label-tag">847K LIVE</span>
+    </div>
+    <div class="presence-card">
+      <div class="presence-globe" id="presence-globe">
+        <svg viewBox="0 0 200 200" class="presence-svg">
+          <circle cx="100" cy="100" r="80" class="presence-ring presence-ring-1"/>
+          <circle cx="100" cy="100" r="60" class="presence-ring presence-ring-2"/>
+          <circle cx="100" cy="100" r="40" class="presence-ring presence-ring-3"/>
+          <circle cx="100" cy="100" r="20" class="presence-ring presence-ring-4"/>
+          <circle cx="100" cy="100" r="6" class="presence-core" id="presence-core"/>
+        </svg>
+      </div>
+      <div class="presence-stats">
+        <div class="presence-stat">
+          <div class="presence-stat-label">JOY</div>
+          <div class="presence-stat-bar"><div class="presence-stat-fill" id="pulse-joy" style="width:30%; background:#fbbf24"></div></div>
+        </div>
+        <div class="presence-stat">
+          <div class="presence-stat-label">TENSION</div>
+          <div class="presence-stat-bar"><div class="presence-stat-fill" id="pulse-tension" style="width:45%; background:#ef4444"></div></div>
+        </div>
+        <div class="presence-stat">
+          <div class="presence-stat-label">HOPE</div>
+          <div class="presence-stat-bar"><div class="presence-stat-fill" id="pulse-hope" style="width:60%; background:#10b981"></div></div>
+        </div>
+        <div class="presence-stat">
+          <div class="presence-stat-label">DISBELIEF</div>
+          <div class="presence-stat-bar"><div class="presence-stat-fill" id="pulse-disbelief" style="width:15%; background:#a855f7"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PILLAR 2 — CO-CAPTAIN MODE
+       Tactical decisions BEFORE captain makes them
+  ============================================================ -->
+  <section class="captain">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>CO-CAPTAIN</span>
+      <span class="section-label-tag" id="captain-status">STANDBY</span>
+    </div>
+    <div class="captain-card" id="captain-card">
+      <div class="captain-empty">
+        <div class="captain-empty-icon">▲</div>
+        <div class="captain-empty-text">Tactical decisions appear between overs. Make your call before the captain does.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       LIVE FEED — Each ball as it happens (cinematic)
+  ============================================================ -->
+  <section class="feed">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>LIVE FEED</span>
+      <span class="section-label-tag" id="feed-ball-meta">0.0</span>
+    </div>
+    <div class="feed-card">
+      <div class="feed-current" id="feed-current">Match starting...</div>
+      <div class="feed-strip" id="feed-strip"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PILLAR 3 — STADIUM WAVE (synchronized tap)
+  ============================================================ -->
+  <section class="wave">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>STADIUM WAVE</span>
+      <span class="section-label-tag" id="wave-status">DORMANT</span>
+    </div>
+    <div class="wave-card" id="wave-card">
+      <div class="wave-prompt" id="wave-prompt">
+        When a big moment hits, hold to join the wave.<br/>
+        <span class="wave-prompt-sub">Synchronized with everyone watching.</span>
+      </div>
+      <div class="wave-orb" id="wave-orb">
+        <div class="wave-orb-ring"></div>
+        <div class="wave-orb-ring wave-orb-ring-2"></div>
+        <div class="wave-orb-core" id="wave-orb-core">
+          <span id="wave-orb-text">HOLD</span>
+        </div>
+      </div>
+      <div class="wave-participation">
+        <div class="wave-bar"><div class="wave-fill" id="wave-fill" style="width:0%"></div></div>
+        <div class="wave-stats">
+          <span><strong id="wave-count">0</strong> joined</span>
+          <span class="wave-threshold">Wave triggers at <strong>50%</strong></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FAN SENTIMENT — what your team's fans are FEELING
+       (qualitatively, not as a counter)
+  ============================================================ -->
+  <section class="sentiment">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>WHAT THE STANDS ARE SAYING</span>
+    </div>
+    <div class="sentiment-feed" id="sentiment-feed"></div>
+  </section>
+
+  <!-- ============================================================
+       ASK THE DIRECTOR (AI chat — context-aware)
+  ============================================================ -->
+  <section class="ask">
+    <div class="section-label">
+      <span class="section-label-dot"></span>
+      <span>ASK THE DIRECTOR</span>
+      <span class="section-label-tag">GPT</span>
+    </div>
+    <div class="ask-card">
+      <div class="ask-body" id="ask-body">
+        <div class="ask-msg ask-msg-ai">Ask me anything as the match unfolds. <em>Why did he change the field? What's at stake here? Who is this player?</em></div>
+      </div>
+      <div class="ask-input">
+        <input type="text" id="ask-input" placeholder="What's on your mind?" />
+        <button onclick="askDirector()" id="ask-send">ASK</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============================================================
+     BOTTOM CONTROL
+============================================================ -->
+<div class="control-bar">
+  <div class="control-row">
+    <div class="speed-btns">
+      <button class="speed-btn" data-speed="2200">1x</button>
+      <button class="speed-btn active" data-speed="900">3x</button>
+      <button class="speed-btn" data-speed="400">8x</button>
+    </div>
+    <button class="play-btn" id="play-btn">▶ PLAY</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     KEY MOMENT THEATRE OVERLAY (Pillar 4)
+     Appears on six/wicket/big moments
+============================================================ -->
+<div class="theatre" id="theatre">
+  <div class="theatre-backdrop"></div>
+  <div class="theatre-content">
+    <div class="theatre-tag" id="theatre-tag">KEY MOMENT</div>
+    <div class="theatre-headline" id="theatre-headline">SIX!</div>
+    <div class="theatre-subhead" id="theatre-subhead">over deep midwicket</div>
+    <div class="theatre-context" id="theatre-context">
+      AI is analyzing the moment...
+    </div>
+    <div class="theatre-reactions">
+      <button class="theatre-react" data-emoji="🔥">🔥</button>
+      <button class="theatre-react" data-emoji="🤯">🤯</button>
+      <button class="theatre-react" data-emoji="👏">👏</button>
+      <button class="theatre-react" data-emoji="💔">💔</button>
+      <button class="theatre-react" data-emoji="🙏">🙏</button>
+    </div>
+    <div class="theatre-collective" id="theatre-collective">
+      <div class="theatre-collective-label">2.4M FANS REACTED</div>
+      <div class="theatre-collective-bar" id="theatre-collective-bar"></div>
+    </div>
+    <button class="theatre-close" onclick="closeTheatre()">Continue watching →</button>
+  </div>
+</div>
+
+<!-- Overlays -->
+<div class="toast" id="toast"></div>
+<div class="emoji-burst" id="emoji-burst"></div>
+
+<!-- ============================================================
+     Scripts — strict load order
+============================================================ -->
+
+<script>
+/* ============================================================
+   PulsePresence — CONFIG
+   ⚠️ THIS IS THE ONLY FILE YOU NORMALLY EDIT.
+============================================================ */
+
+const CONFIG = {
+  // 🔑 PASTE YOUR OPENAI KEY HERE
+  // ⚠️ Demo only. Anyone opening the page can see this.
+  OPENAI_API_KEY: "",   // "sk-proj-..."
+
+  GPT_MODEL: "gpt-4o-mini",
+  GPT_API_URL: "https://api.openai.com/v1/chat/completions",
+
+  MATCH_DATA_PATH: "data/match.json",
+
+  // Playback speed (ms per ball)
+  // 2200 = realistic, 900 = 3x demo, 400 = 8x fast demo
+  DEFAULT_SPEED: 900,
+
+  AI_TIMEOUT_MS: 5000,
+
+  // How often the Match Director "checks in" with a narrative
+  // (in number of balls). Every 6 balls = once per over.
+  DIRECTOR_INTERVAL: 6,
+
+  // How aggressively to fire Co-Captain prompts
+  // 1 = every over, 2 = every other over
+  CAPTAIN_OVER_INTERVAL: 2,
+};
+
+CONFIG.AI_ENABLED = CONFIG.OPENAI_API_KEY.length > 10;
+
+/* ============================================================
+   PulsePresence — DATA MODULE
+============================================================ */
+
+let MATCH_DATA_RAW = null;
+let ALL_BALLS = [];
+let TEAM1 = "";
+let TEAM2 = "";
+let VENUE = "";
+
+// ============================================================
+// Parse Cricsheet JSON → flat ball events
+// ============================================================
+function parseCricsheet(data){
+  const balls = [];
+  data.innings.forEach((inn, inningsIdx) => {
+    inn.overs.forEach(over => {
+      over.deliveries.forEach((d, ballIdx) => {
+        const isWicket = !!d.wickets;
+        const runs = d.runs.batter;
+        let type;
+        if (isWicket)        type = 'wicket';
+        else if (runs === 6) type = 'six';
+        else if (runs === 4) type = 'four';
+        else if (runs === 0) type = 'dot';
+        else if (runs === 1) type = 'one';
+        else if (runs === 2) type = 'two';
+        else                 type = 'other';
+
+        balls.push({
+          innings: inningsIdx,
+          battingTeam: inn.team,
+          over: over.over,
+          ball: ballIdx + 1,
+          batter: d.batter,
+          bowler: d.bowler,
+          runs: isWicket ? 'W' : runs,
+          type: type,
+          wicketKind: isWicket ? d.wickets[0].kind : null,
+          playerOut: isWicket ? d.wickets[0].player_out : null
+        });
+      });
+    });
+  });
+  return balls;
+}
+
+function shortTeam(name){
+  if (!name) return "—";
+  if (name.includes('Bengaluru') || name.includes('Bangalore')) return 'RCB';
+  if (name.includes('Chennai'))   return 'CSK';
+  if (name.includes('Mumbai'))    return 'MI';
+  if (name.includes('Kolkata'))   return 'KKR';
+  if (name.includes('Delhi'))     return 'DC';
+  if (name.includes('Punjab'))    return 'PBKS';
+  if (name.includes('Rajasthan')) return 'RR';
+  if (name.includes('Sunrisers')) return 'SRH';
+  if (name.includes('Gujarat'))   return 'GT';
+  if (name.includes('Lucknow'))   return 'LSG';
+  return name.split(' ')[0].toUpperCase().substring(0, 3);
+}
+
+// ============================================================
+// SENTIMENT MESSAGES — qualitative emotional expressions
+// These are NOT chat banter. They're little emotional vignettes.
+// ============================================================
+const SENTIMENT_BY_EVENT = {
+  six_rcb: [
+    "Chinnaswamy is shaking. I can feel it through the screen.",
+    "I'm not crying. You're crying.",
+    "This is why I never miss an RCB game.",
+    "GET IN. That's how you start an innings.",
+    "Goosebumps. Literal goosebumps right now."
+  ],
+  six_csk: [
+    "Thala said sit down, then stood up himself.",
+    "Whistle Podu. WHISTLE PODU.",
+    "Yellow brigade, are you watching this?",
+    "MSD effect even when he's not batting.",
+    "This is a different level of energy at Chepauk-South."
+  ],
+  wicket_rcb: [
+    "We had to take that. Massive breakthrough.",
+    "ROAR. The Chinnaswamy roar is unreal.",
+    "Bowling unit finally clicking.",
+    "Champions take wickets. We're taking wickets.",
+  ],
+  wicket_csk: [
+    "Mahi pulled the rabbit out. Of course.",
+    "That's why he's Captain Cool.",
+    "Dhoni stumping = pure joy.",
+    "Pathirana doing Pathirana things.",
+  ],
+  wicket_neutral: [
+    "Whoever you support, that was a *good* ball.",
+    "T20 cricket, man. One ball changes everything.",
+    "Imagine being a bowler in this format. Brutal.",
+  ],
+  four_rcb: ["Threading the needle.", "Pure timing. Pure class.", "Bat speed unreal.", "Chase mode initiated."],
+  four_csk: ["Old school four. Beautiful.", "Boundaries are coming.", "Chepauk classic.", "Patience paying off."],
+  dot_pressure: [
+    "Squeeze. Squeeze. Squeeze.",
+    "Dot balls are gold in T20.",
+    "Pressure is building. You can see it on the faces.",
+    "This over could swing the match.",
+  ],
+  intro: [
+    "Ready. Heart already racing.",
+    "Long day at work, this is my therapy.",
+    "Whole family on the couch. Phone in hand.",
+    "Bring it on. Let's go.",
+    "I am NERVOUS man. So much riding on this."
+  ]
+};
+
+// ============================================================
+// CAPTAIN DECISIONS — tactical questions tied to match moments
+// These appear between overs (or after key events).
+// `actual` = what the captain actually did (the answer)
+// ============================================================
+const CAPTAIN_DECISIONS = [
+  {
+    triggerOver: 1,
+    triggerInnings: 0,
+    question: "Powerplay attack — what's your move?",
+    context: "Opener Gaikwad is set. 6 runs from 6 balls. Bowling change?",
+    options: [
+      { label: "Stick with Yash Dayal", actual: false, fanPct: 22 },
+      { label: "Bring Siraj on for swing", actual: true, fanPct: 51 },
+      { label: "Surprise — spin in powerplay", actual: false, fanPct: 27 }
+    ],
+    outcome: "Captain went with <strong>Siraj</strong>. Match the crowd's instinct."
+  },
+  {
+    triggerOver: 3,
+    triggerInnings: 0,
+    question: "First wicket falls. New batter in. Field setting?",
+    context: "Rahane just departed. New batter facing a moving ball.",
+    options: [
+      { label: "Attacking — 4 catchers", actual: true, fanPct: 64 },
+      { label: "Stay defensive — singles plug", actual: false, fanPct: 21 },
+      { label: "Bring on spin immediately", actual: false, fanPct: 15 }
+    ],
+    outcome: "Captain went <strong>attacking</strong>. You read the moment."
+  },
+  {
+    triggerOver: 5,
+    triggerInnings: 0,
+    question: "End of powerplay coming. Risk or hold?",
+    context: "26/1 after 4 overs. CSK have weathered the storm.",
+    options: [
+      { label: "Hold — build platform", actual: false, fanPct: 39 },
+      { label: "Risk — go for boundary", actual: true, fanPct: 44 },
+      { label: "Rotate strike, no boundaries", actual: false, fanPct: 17 }
+    ],
+    outcome: "Batters chose <strong>risk</strong>. Two boundaries in the over."
+  },
+  {
+    triggerOver: 7,
+    triggerInnings: 0,
+    question: "Middle overs strategy?",
+    context: "Spin coming on. Match in the balance.",
+    options: [
+      { label: "Aggression — take down the spinner", actual: false, fanPct: 34 },
+      { label: "Calculated — rotate, attack one over", actual: true, fanPct: 48 },
+      { label: "Caution — don't lose another wicket", actual: false, fanPct: 18 }
+    ],
+    outcome: "They went <strong>calculated</strong>. Smart cricket."
+  },
+  {
+    triggerOver: 11,
+    triggerInnings: 0,
+    question: "Dhoni walks in. What does Faf do?",
+    context: "MSD is at the crease. Crowd is on its feet. 5 balls left in the over.",
+    options: [
+      { label: "Pace him out — short ball line", actual: false, fanPct: 28 },
+      { label: "Slow him down — yorker length", actual: true, fanPct: 53 },
+      { label: "Tempt him — full and wide", actual: false, fanPct: 19 }
+    ],
+    outcome: "Yorkers came in. <strong>Mahi found them anyway.</strong> Of course."
+  },
+  {
+    triggerOver: 1,
+    triggerInnings: 1,
+    question: "RCB chasing. Powerplay approach?",
+    context: "Kohli and Faf out. The chase starts now.",
+    options: [
+      { label: "Go hard from ball 1", actual: true, fanPct: 47 },
+      { label: "Anchor — Kohli plays himself in", actual: false, fanPct: 38 },
+      { label: "Mixed — calculated risk", actual: false, fanPct: 15 }
+    ],
+    outcome: "RCB went <strong>hard</strong>. Kohli's intent was clear."
+  },
+  {
+    triggerOver: 3,
+    triggerInnings: 1,
+    question: "Faf out. Patidar in. Tactical shift?",
+    context: "Pressure building. Required rate climbing.",
+    options: [
+      { label: "Patidar takes charge", actual: true, fanPct: 41 },
+      { label: "Kohli takes the burden", actual: false, fanPct: 44 },
+      { label: "Both calm, build partnership", actual: false, fanPct: 15 }
+    ],
+    outcome: "Patidar attacked. Bold move that paid off."
+  },
+];
+
+/* ============================================================
+   PulsePresence — MATCH DIRECTOR
+   The personalized AI narrator. The killer feature.
+============================================================ */
+
+// Director state (independent of match state)
+const Director = {
+  chapter: 'PROLOGUE',
+  emotion: 'ANTICIPATION',
+  lastNarrativeBallIdx: -1,
+
+  // Track user's emotional journey
+  userReactions: [],   // [{ballIdx, emoji}]
+  userPicks: [],        // captain picks
+  userQuestions: [],    // asked questions
+
+  // Compute current chapter based on match phase
+  computeChapter(state, ball){
+    if (!ball) return 'PROLOGUE';
+    if (ball.innings === 0){
+      if (ball.over <= 5)  return 'POWERPLAY';
+      if (ball.over <= 14) return 'MIDDLE OVERS';
+      return 'DEATH OVERS';
+    } else {
+      if (ball.over <= 5)  return 'THE CHASE BEGINS';
+      if (ball.over <= 14) return 'MIDDLE OF THE CHASE';
+      return 'CLIMAX';
+    }
+  },
+
+  // Compute "what should the user be feeling right now"
+  computeEmotion(state){
+    const wp = state.wp;
+    const userTeam = state.userTeam;
+    const battingShort = state.ballIdx >= 0 ? shortTeam(ALL_BALLS[state.ballIdx].battingTeam) : null;
+    if (userTeam === 'neutral') return 'CURIOUS';
+
+    // Approximate user's perspective
+    const isUserBatting = (userTeam === battingShort?.toLowerCase());
+    const adjustedWp = isUserBatting ? wp : (100 - wp);
+
+    if (adjustedWp > 75) return 'EUPHORIC';
+    if (adjustedWp > 60) return 'CONFIDENT';
+    if (adjustedWp > 45) return 'HOPEFUL';
+    if (adjustedWp > 30) return 'TENSE';
+    return 'ANXIOUS';
+  },
+
+  // Get a quick fallback narrative if GPT fails
+  fallbackNarrative(state){
+    const ball = state.ballIdx >= 0 ? ALL_BALLS[state.ballIdx] : null;
+    const userTeam = state.userTeam === 'neutral' ? 'the match' : state.userTeam.toUpperCase();
+
+    if (!ball){
+      return `The match is about to begin. You're watching <strong>${shortTeam(TEAM2)} vs ${shortTeam(TEAM1)}</strong>. Two histories, one night.`;
+    }
+
+    const phase = Director.computeChapter(state, ball);
+    const score = `${state.inningsScores[ball.innings].runs}/${state.inningsScores[ball.innings].wkts}`;
+
+    const variants = [
+      `<em>${phase}.</em> ${shortTeam(ball.battingTeam)} at ${score}. The next over could change the story.`,
+      `Score: <strong>${score}</strong>. ${ball.batter} is finding his rhythm. ${userTeam} fans are watching every ball.`,
+      `<em>The tension thickens.</em> Every dot ball feels heavier now. ${ball.bowler} knows it.`
+    ];
+    return variants[Math.floor(Math.random() * variants.length)];
+  }
+};
+
+// ============================================================
+// GPT caller (same pattern as v1, isolated here)
+// ============================================================
+async function callGPT(systemPrompt, userPrompt, maxTokens = 100){
+  if (!CONFIG.AI_ENABLED) return null;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), CONFIG.AI_TIMEOUT_MS);
+
+    const res = await fetch(CONFIG.GPT_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + CONFIG.OPENAI_API_KEY
+      },
+      body: JSON.stringify({
+        model: CONFIG.GPT_MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: userPrompt }
+        ],
+        max_tokens: maxTokens,
+        temperature: 0.85
+      }),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error('GPT ' + res.status);
+    const data = await res.json();
+    return data.choices[0].message.content.trim();
+  } catch (e) {
+    console.warn('GPT failed:', e.message);
+    return null;
+  }
+}
+
+// ============================================================
+// Generate a narrative beat (between overs)
+// ============================================================
+async function generateNarrative(state){
+  const textEl = document.getElementById('director-text');
+  textEl.innerHTML = '<span class="director-loading"></span> The director is composing...';
+
+  const lastBall = state.ballIdx >= 0 ? ALL_BALLS[state.ballIdx] : null;
+  const chapter = Director.computeChapter(state, lastBall);
+  const emotion = Director.computeEmotion(state);
+
+  Director.chapter = chapter;
+  Director.emotion = emotion;
+  document.getElementById('director-chapter').textContent = chapter;
+  document.getElementById('director-emotion').textContent = emotion;
+
+  if (CONFIG.AI_ENABLED && lastBall){
+    const recentBalls = state.balls.slice(-6).map(b => b.type).join(', ');
+    const battingShort = shortTeam(lastBall.battingTeam);
+    const userTeam = state.userTeam === 'neutral' ? 'a neutral viewer' : `a ${state.userTeam.toUpperCase()} fan`;
+    const score = `${state.inningsScores[lastBall.innings].runs}/${state.inningsScores[lastBall.innings].wkts}`;
+    const reactionsCount = Director.userReactions.length;
+
+    const ctx = `Match: ${shortTeam(TEAM2)} vs ${shortTeam(TEAM1)} at ${VENUE.split(',')[0]}.
+Innings ${lastBall.innings + 1}, Score: ${battingShort} ${score} after ${lastBall.over}.${lastBall.ball} overs.
+Win probability: ${battingShort} at ${Math.round(state.wp)}%.
+Last 6 balls: ${recentBalls}.
+Viewer is ${userTeam}. They've reacted ${reactionsCount} times this match.
+Current phase: ${chapter}. Their emotional state: ${emotion}.`;
+
+    const sys = `You are the MATCH DIRECTOR — a poetic, intimate cricket narrator. You speak DIRECTLY to one viewer, not a crowd. Your job: capture the emotional truth of THIS moment for THIS viewer.
+
+Rules:
+- 2 sentences MAXIMUM. Often 1.
+- Speak in second person occasionally ("Your captain just...", "You feel it too?").
+- Wrap key player names/numbers in <strong> tags. Wrap emotional emphasis in <em> tags.
+- NO clichés like "edge of your seat" or "nail-biting".
+- NO hashtags, NO emojis.
+- Acknowledge their team's perspective without being sycophantic.
+- Sound like a film narrator, not ESPN.
+
+Examples of tone:
+"Three dots in a row. Bumrah is not letting them breathe. <em>This is the over that decides it.</em>"
+"<strong>Patidar</strong> just took down the spinner. Faf would have ordered exactly that shot."
+"You picked Siraj. The captain agreed. The wicket came. <em>You're inside their heads tonight.</em>"`;
+
+    const result = await callGPT(sys, ctx, 90);
+    if (result){
+      textEl.innerHTML = result;
+      document.getElementById('director-source').textContent = 'GPT';
+      return;
+    }
+  }
+
+  // Fallback
+  textEl.innerHTML = Director.fallbackNarrative(state);
+  document.getElementById('director-source').textContent = CONFIG.AI_ENABLED ? 'GPT·FB' : 'SCRIPTED';
+}
+
+// ============================================================
+// AI "Ask the Director" handler
+// ============================================================
+async function askDirector(){
+  const input = document.getElementById('ask-input');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+
+  appendAskMsg('user', q);
+  const placeholder = appendAskMsg('ai', '<span class="director-loading"></span> thinking...');
+  Director.userQuestions.push(q);
+
+  if (!CONFIG.AI_ENABLED){
+    placeholder.innerHTML = "<em>(AI is offline — paste your OpenAI key in js/config.js to enable me.)</em>";
+    return;
+  }
+
+  const lastBall = state.ballIdx >= 0 ? ALL_BALLS[state.ballIdx] : null;
+  const ctx = `Match context: ${shortTeam(TEAM2)} vs ${shortTeam(TEAM1)} at ${VENUE.split(',')[0]}.
+Currently: ${lastBall ? `Innings ${lastBall.innings + 1}, ${state.inningsScores[lastBall.innings].runs}/${state.inningsScores[lastBall.innings].wkts} after ${lastBall.over}.${lastBall.ball}` : 'pre-match'}.
+Viewer supports: ${state.userTeam === 'neutral' ? 'no team' : state.userTeam.toUpperCase()}.`;
+
+  const sys = `You are the Match Director. You answer cricket questions from a viewer in 2-3 short, vivid sentences. Speak directly, warmly, with personality. Reference current match context when relevant. NO long explanations. NO disclaimers. Wrap key terms in <strong>.`;
+
+  const result = await callGPT(sys, ctx + '\n\nQuestion: ' + q, 130);
+  placeholder.innerHTML = result || "<em>Couldn't reach the AI. Try again?</em>";
+  document.getElementById('ask-body').scrollTop = document.getElementById('ask-body').scrollHeight;
+}
+
+function appendAskMsg(role, text){
+  const el = document.createElement('div');
+  el.className = 'ask-msg ask-msg-' + role;
+  el.innerHTML = text;
+  const body = document.getElementById('ask-body');
+  body.appendChild(el);
+  body.scrollTop = body.scrollHeight;
+  return el;
+}
+
+/* ============================================================
+   PulsePresence — CO-CAPTAIN
+   Tactical decisions that appear between overs.
+   You vote BEFORE the captain acts, then see if you matched.
+============================================================ */
+
+const Captain = {
+  used: new Set(),       // decision IDs already shown
+  activeDecision: null,
+  picked: null,
+};
+
+// ============================================================
+// Trigger a captain prompt if one matches current context
+// ============================================================
+function maybeShowCaptainPrompt(state, ball){
+  if (!ball) return;
+  // Trigger at the END of an over only (last ball)
+  if (ball.ball < 6 && ball.type !== 'wicket') return;
+
+  // Look for matching decision
+  const decision = CAPTAIN_DECISIONS.find(d =>
+    d.triggerOver === ball.over &&
+    d.triggerInnings === ball.innings &&
+    !Captain.used.has(d.triggerInnings + '-' + d.triggerOver)
+  );
+
+  if (!decision) return;
+  Captain.used.add(decision.triggerInnings + '-' + decision.triggerOver);
+  showCaptainPrompt(decision);
+}
+
+// ============================================================
+// Render the prompt UI
+// ============================================================
+function showCaptainPrompt(decision){
+  Captain.activeDecision = decision;
+  Captain.picked = null;
+
+  document.getElementById('captain-status').textContent = 'YOUR CALL · 12s';
+
+  const card = document.getElementById('captain-card');
+  card.innerHTML = `
+    <div class="captain-prompt">
+      <div class="captain-question">${decision.question}</div>
+      <div class="captain-context">${decision.context}</div>
+      <div class="captain-options">
+        ${decision.options.map((opt, i) => `
+          <button class="captain-option" data-idx="${i}">
+            <span class="captain-option-label">${opt.label}</span>
+            <span class="captain-option-pct">— %</span>
+            <div class="captain-option-bar" style="width:0%"></div>
+          </button>
+        `).join('')}
+      </div>
+      <div class="captain-result" id="captain-result" style="display:none"></div>
+    </div>
+  `;
+
+  // Wire up clicks
+  card.querySelectorAll('.captain-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (Captain.picked !== null) return;
+      Captain.picked = parseInt(btn.dataset.idx);
+      btn.classList.add('picked');
+      revealCaptainResult();
+    });
+  });
+
+  // Auto-reveal after ~12 seconds if user didn't pick
+  setTimeout(() => {
+    if (Captain.activeDecision === decision && Captain.picked === null){
+      revealCaptainResult();
+    }
+  }, 12000);
+}
+
+// ============================================================
+// Reveal what the actual captain did + crowd's call
+// ============================================================
+function revealCaptainResult(){
+  const decision = Captain.activeDecision;
+  if (!decision) return;
+
+  const card = document.getElementById('captain-card');
+  const buttons = card.querySelectorAll('.captain-option');
+
+  buttons.forEach((btn, i) => {
+    const opt = decision.options[i];
+    btn.classList.add('revealed');
+    btn.querySelector('.captain-option-pct').textContent = opt.fanPct + '%';
+    btn.querySelector('.captain-option-bar').style.width = opt.fanPct + '%';
+    if (opt.actual) btn.classList.add('actual');
+  });
+
+  const userMatched = Captain.picked !== null && decision.options[Captain.picked].actual;
+  const resultEl = document.getElementById('captain-result');
+  resultEl.style.display = 'block';
+
+  if (Captain.picked === null){
+    resultEl.innerHTML = `<div class="captain-result-correct">DECISION REVEALED</div>${decision.outcome}`;
+  } else if (userMatched){
+    resultEl.innerHTML = `<div class="captain-result-correct">✓ YOU AND THE CAPTAIN AGREE</div>${decision.outcome}`;
+  } else {
+    resultEl.innerHTML = `<div class="captain-result-correct" style="color:var(--ink-dim)">DIFFERENT CALL</div>${decision.outcome}`;
+  }
+
+  document.getElementById('captain-status').textContent = 'REVEALED';
+
+  // Reset to empty state after a while
+  setTimeout(() => {
+    if (Captain.activeDecision === decision){
+      Captain.activeDecision = null;
+      const card = document.getElementById('captain-card');
+      card.innerHTML = `
+        <div class="captain-empty">
+          <div class="captain-empty-icon">▲</div>
+          <div class="captain-empty-text">Next tactical decision coming soon. Stay sharp.</div>
+        </div>
+      `;
+      document.getElementById('captain-status').textContent = 'STANDBY';
+    }
+  }, 8000);
+}
+
+/* ============================================================
+   PulsePresence — STADIUM WAVE
+   Hold the orb. Others are holding too. When 50%+ hold together,
+   a wave ripples across all viewers (simulated visually).
+============================================================ */
+
+const Wave = {
+  isUserHolding: false,
+  participation: 0,        // 0-100%
+  baseParticipation: 0,    // simulated others-holding baseline
+  targetParticipation: 0,
+  userJoinedAt: 0,
+  cooldown: false,
+  triggerCount: 0,         // how many waves have fired this match
+};
+
+// ============================================================
+// Init wave UI events
+// ============================================================
+function initWave(){
+  const orb = document.getElementById('wave-orb');
+
+  const startHold = (e) => {
+    if (Wave.cooldown) return;
+    e.preventDefault();
+    Wave.isUserHolding = true;
+    Wave.userJoinedAt = Date.now();
+    orb.classList.add('holding');
+    document.getElementById('wave-orb-text').textContent = 'HELD';
+    document.getElementById('wave-status').textContent = 'YOU\'RE IN';
+    if (navigator.vibrate) navigator.vibrate(15);
+  };
+
+  const endHold = (e) => {
+    if (!Wave.isUserHolding) return;
+    Wave.isUserHolding = false;
+    orb.classList.remove('holding');
+    document.getElementById('wave-orb-text').textContent = 'HOLD';
+    document.getElementById('wave-status').textContent = 'DORMANT';
+  };
+
+  orb.addEventListener('mousedown', startHold);
+  orb.addEventListener('touchstart', startHold);
+  orb.addEventListener('mouseup', endHold);
+  orb.addEventListener('mouseleave', endHold);
+  orb.addEventListener('touchend', endHold);
+  orb.addEventListener('touchcancel', endHold);
+
+  // Tick the simulation
+  setInterval(tickWave, 100);
+}
+
+// ============================================================
+// Simulate other viewers holding
+// Baseline participation rises and falls based on match drama
+// ============================================================
+function tickWave(){
+  // Smooth approach target
+  Wave.baseParticipation += (Wave.targetParticipation - Wave.baseParticipation) * 0.08;
+
+  // Random small jitter to feel alive
+  const jitter = (Math.random() - 0.5) * 2;
+
+  // Your contribution
+  const userContrib = Wave.isUserHolding ? 4 : 0;
+
+  Wave.participation = Math.max(0, Math.min(100, Wave.baseParticipation + jitter + userContrib));
+
+  // Update UI
+  const pct = Math.round(Wave.participation);
+  document.getElementById('wave-fill').style.width = pct + '%';
+  const count = Math.floor(pct * 8500); // 50% = ~425K simulated holding
+  document.getElementById('wave-count').textContent = count.toLocaleString();
+
+  // Trigger threshold
+  if (Wave.participation >= 50 && !Wave.cooldown && Wave.isUserHolding){
+    triggerWave();
+  }
+
+  // Decay target over time
+  Wave.targetParticipation = Math.max(0, Wave.targetParticipation - 0.3);
+}
+
+// ============================================================
+// Bump baseline participation (called from engine on big events)
+// ============================================================
+function bumpWave(amount){
+  Wave.targetParticipation = Math.min(85, Wave.targetParticipation + amount);
+}
+
+// ============================================================
+// FIRE THE WAVE
+// ============================================================
+function triggerWave(){
+  Wave.cooldown = true;
+  Wave.triggerCount++;
+
+  // Visual ripple
+  const ripple = document.createElement('div');
+  ripple.className = 'wave-ripple fire';
+  ripple.innerHTML = '<div class="wave-ripple-circle"></div>';
+  document.body.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 2500);
+
+  // Second + third ripple staggered
+  setTimeout(() => {
+    const r2 = document.createElement('div');
+    r2.className = 'wave-ripple fire';
+    r2.innerHTML = '<div class="wave-ripple-circle"></div>';
+    document.body.appendChild(r2);
+    setTimeout(() => r2.remove(), 2500);
+  }, 250);
+
+  setTimeout(() => {
+    const r3 = document.createElement('div');
+    r3.className = 'wave-ripple fire';
+    r3.innerHTML = '<div class="wave-ripple-circle"></div>';
+    document.body.appendChild(r3);
+    setTimeout(() => r3.remove(), 2500);
+  }, 500);
+
+  // Haptic burst pattern
+  if (navigator.vibrate) navigator.vibrate([20, 60, 20, 60, 20]);
+
+  // Toast
+  showToast('🌊 WAVE TRIGGERED · 412K phones pulsing');
+
+  // Card celebration
+  const card = document.getElementById('wave-card');
+  card.classList.add('active');
+  setTimeout(() => card.classList.remove('active'), 4000);
+
+  // Cooldown 8 seconds
+  setTimeout(() => {
+    Wave.cooldown = false;
+    Wave.targetParticipation = 0;
+  }, 8000);
+}
+
+/* ============================================================
+   PulsePresence — KEY MOMENT THEATRE
+   On six/wicket/special events, the screen transforms.
+   Big headline, AI context, reactions, collective sentiment.
+============================================================ */
+
+const Theatre = {
+  isOpen: false,
+  currentBall: null,
+};
+
+// ============================================================
+// Open the theatre for a key moment
+// ============================================================
+async function openTheatre(ball, state){
+  if (Theatre.isOpen) return;
+  Theatre.isOpen = true;
+  Theatre.currentBall = ball;
+
+  const theatre = document.getElementById('theatre');
+  theatre.className = 'theatre';
+
+  let headline, subhead, tagClass = ball.type;
+  if (ball.type === 'six'){
+    headline = 'SIX!';
+    subhead = `${ball.batter} clears the rope`;
+  } else if (ball.type === 'four'){
+    headline = 'FOUR!';
+    subhead = `${ball.batter} finds the gap`;
+  } else if (ball.type === 'wicket'){
+    headline = 'OUT';
+    subhead = `${ball.playerOut} ${ball.wicketKind}, b ${ball.bowler}`;
+  } else {
+    headline = 'KEY MOMENT';
+    subhead = '';
+  }
+
+  document.getElementById('theatre-tag').textContent = ball.type === 'wicket' ? 'BREAKTHROUGH' : 'KEY MOMENT';
+  document.getElementById('theatre-headline').textContent = headline;
+  document.getElementById('theatre-subhead').textContent = subhead;
+  document.getElementById('theatre-context').innerHTML = '<span class="director-loading"></span> The director is analyzing...';
+
+  // Collective sentiment bar
+  renderCollectiveSentiment(ball);
+
+  theatre.classList.add(tagClass);
+  theatre.classList.add('show');
+
+  // Fetch AI context (async, doesn't block opening)
+  const aiContext = await generateMomentContext(ball, state);
+  if (Theatre.currentBall === ball){
+    document.getElementById('theatre-context').innerHTML = aiContext;
+  }
+
+  // Auto-close after a while if user doesn't dismiss
+  setTimeout(() => {
+    if (Theatre.currentBall === ball && Theatre.isOpen){
+      closeTheatre();
+    }
+  }, 6500);
+}
+
+function closeTheatre(){
+  document.getElementById('theatre').classList.remove('show');
+  Theatre.isOpen = false;
+  Theatre.currentBall = null;
+}
+
+// ============================================================
+// Wire up reactions in the theatre
+// ============================================================
+function initTheatre(){
+  document.querySelectorAll('.theatre-react').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const emoji = btn.dataset.emoji;
+      spawnFloatingEmoji(emoji);
+      if (Director && Theatre.currentBall){
+        Director.userReactions.push({ ballIdx: Theatre.currentBall.over * 6 + Theatre.currentBall.ball, emoji });
+      }
+      if (navigator.vibrate) navigator.vibrate(10);
+    });
+  });
+}
+
+// ============================================================
+// Spawn a floating emoji at a random burst point
+// ============================================================
+function spawnFloatingEmoji(emoji){
+  const el = document.createElement('div');
+  el.className = 'floating-emoji';
+  el.textContent = emoji;
+  el.style.left = (40 + Math.random() * 40) + 'vw';
+  el.style.top = (50 + Math.random() * 20) + 'vh';
+  document.getElementById('emoji-burst').appendChild(el);
+  setTimeout(() => el.remove(), 2400);
+}
+
+// ============================================================
+// AI context for a key moment
+// ============================================================
+async function generateMomentContext(ball, state){
+  if (!CONFIG.AI_ENABLED){
+    return fallbackMomentContext(ball, state);
+  }
+
+  const score = `${state.inningsScores[ball.innings].runs}/${state.inningsScores[ball.innings].wkts}`;
+  const battingShort = shortTeam(ball.battingTeam);
+  const userTeam = state.userTeam === 'neutral' ? 'a neutral fan' : `a ${state.userTeam.toUpperCase()} fan`;
+
+  const ctx = `Cricket key moment.
+Ball: ${ball.over}.${ball.ball}, Innings ${ball.innings + 1}.
+What happened: ${ball.type === 'wicket' ? `WICKET — ${ball.playerOut} ${ball.wicketKind}, bowled by ${ball.bowler}` : `${ball.type.toUpperCase()} — ${ball.batter} off ${ball.bowler}`}.
+Score now: ${battingShort} ${score}.
+Win probability for ${battingShort}: ${Math.round(state.wp)}%.
+Viewer is ${userTeam}.`;
+
+  const sys = `You are the MATCH DIRECTOR. Write a 2-3 sentence context for this key moment. Capture WHY IT MATTERS — match impact, momentum, stakes. Vivid, intimate, second-person occasionally. Wrap key terms in <strong>. Use <em> for emotional emphasis. NO clichés.
+
+Example:
+"That's <strong>${ball.batter || 'his'}</strong>'s third six in this over. <em>The chase just shifted from probable to inevitable.</em> Look at the dugout — they're already standing."`;
+
+  const result = await callGPT(sys, ctx, 110);
+  return result || fallbackMomentContext(ball, state);
+}
+
+function fallbackMomentContext(ball, state){
+  if (ball.type === 'six'){
+    return `That's a <strong>statement shot</strong> from ${ball.batter}. The bowler's plan? Out the window. <em>Watch what happens next over.</em>`;
+  }
+  if (ball.type === 'wicket'){
+    return `<strong>${ball.bowler}</strong> with the breakthrough. ${ball.playerOut} ${ball.wicketKind}. <em>The whole momentum just flipped.</em>`;
+  }
+  if (ball.type === 'four'){
+    return `Clean. Crisp. Four runs. ${ball.batter} is timing it sweetly. <em>Confidence in every stroke.</em>`;
+  }
+  return `A pivotal ball. The match listens.`;
+}
+
+// ============================================================
+// Collective sentiment bar (which emotion is dominant globally)
+// ============================================================
+function renderCollectiveSentiment(ball){
+  const bar = document.getElementById('theatre-collective-bar');
+  const label = document.querySelector('.theatre-collective-label');
+
+  let segments;
+  if (ball.type === 'six'){
+    segments = [
+      { emoji: '🔥', pct: 38, color: 'rgba(255,157,46,0.8)' },
+      { emoji: '🤯', pct: 31, color: 'rgba(168,85,247,0.7)' },
+      { emoji: '👏', pct: 19, color: 'rgba(16,185,129,0.7)' },
+      { emoji: '🙏', pct: 12, color: 'rgba(160,160,160,0.5)' }
+    ];
+    label.textContent = (2.4 + Math.random() * 1.5).toFixed(1) + 'M FANS REACTED';
+  } else if (ball.type === 'wicket'){
+    segments = [
+      { emoji: '🤯', pct: 34, color: 'rgba(168,85,247,0.7)' },
+      { emoji: '🔥', pct: 28, color: 'rgba(255,157,46,0.8)' },
+      { emoji: '💔', pct: 26, color: 'rgba(239,68,68,0.7)' },
+      { emoji: '🙏', pct: 12, color: 'rgba(160,160,160,0.5)' }
+    ];
+    label.textContent = (3.1 + Math.random() * 0.9).toFixed(1) + 'M FANS REACTED';
+  } else {
+    segments = [
+      { emoji: '🔥', pct: 35, color: 'rgba(255,157,46,0.8)' },
+      { emoji: '👏', pct: 35, color: 'rgba(16,185,129,0.7)' },
+      { emoji: '🙏', pct: 20, color: 'rgba(160,160,160,0.5)' },
+      { emoji: '🤯', pct: 10, color: 'rgba(168,85,247,0.7)' }
+    ];
+    label.textContent = (1.2 + Math.random() * 0.6).toFixed(1) + 'M FANS REACTED';
+  }
+
+  bar.innerHTML = segments.map(s =>
+    `<div class="theatre-collective-segment" style="flex: ${s.pct}; background: ${s.color}; color: rgba(255,255,255,0.9); font-weight: 700;">${s.emoji} ${s.pct}%</div>`
+  ).join('');
+}
+
+/* ============================================================
+   PulsePresence — ENGINE
+   Match progression, presence (emotion) model, sentiment feed.
+   Note: no XP, no streaks, no leaderboard. By design.
+============================================================ */
+
+// ============================================================
+// PRESENCE MODEL — 4 dimensions of collective emotion
+// ============================================================
+const Presence = {
+  joy: 30,
+  tension: 45,
+  hope: 60,
+  disbelief: 15,
+
+  // Targets that decay toward
+  joyT: 30,
+  tensionT: 45,
+  hopeT: 60,
+  disbeliefT: 15,
+
+  update(ball, state){
+    // Compute deltas based on event
+    if (ball.type === 'six'){
+      this.joyT       = clamp(this.joyT + 35, 10, 95);
+      this.tensionT   = clamp(this.tensionT - 8, 10, 95);
+      this.hopeT      = clamp(this.hopeT + 20, 10, 95);
+      this.disbeliefT = clamp(this.disbeliefT + 18, 10, 95);
+    } else if (ball.type === 'wicket'){
+      this.joyT       = clamp(this.joyT - 10, 10, 95);
+      this.tensionT   = clamp(this.tensionT + 40, 10, 95);
+      this.hopeT      = clamp(this.hopeT - 25, 10, 95);
+      this.disbeliefT = clamp(this.disbeliefT + 30, 10, 95);
+    } else if (ball.type === 'four'){
+      this.joyT       = clamp(this.joyT + 18, 10, 95);
+      this.tensionT   = clamp(this.tensionT - 5, 10, 95);
+      this.hopeT      = clamp(this.hopeT + 12, 10, 95);
+    } else if (ball.type === 'dot'){
+      this.tensionT   = clamp(this.tensionT + 6, 10, 95);
+      this.joyT       = clamp(this.joyT - 3, 10, 95);
+    } else {
+      this.joyT       = clamp(this.joyT + 3, 10, 95);
+    }
+  },
+
+  animate(){
+    this.joy       += (this.joyT - this.joy) * 0.08;
+    this.tension   += (this.tensionT - this.tension) * 0.08;
+    this.hope      += (this.hopeT - this.hope) * 0.08;
+    this.disbelief += (this.disbeliefT - this.disbelief) * 0.08;
+
+    // Slow drift toward baseline
+    this.joyT       += ((30 - this.joyT) * 0.005);
+    this.tensionT   += ((45 - this.tensionT) * 0.005);
+    this.hopeT      += ((50 - this.hopeT) * 0.005);
+    this.disbeliefT += ((15 - this.disbeliefT) * 0.008);
+
+    // Update DOM
+    document.getElementById('pulse-joy').style.width = this.joy + '%';
+    document.getElementById('pulse-tension').style.width = this.tension + '%';
+    document.getElementById('pulse-hope').style.width = this.hope + '%';
+    document.getElementById('pulse-disbelief').style.width = this.disbelief + '%';
+
+    // Pulse the central globe core based on overall intensity
+    const intensity = (this.joy + this.tension + this.hope + this.disbelief) / 4;
+    const core = document.getElementById('presence-core');
+    if (core){
+      const scale = 1 + (intensity - 40) / 200;
+      core.style.transform = `scale(${scale})`;
+    }
+
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+// ============================================================
+// SENTIMENT FEED — emotional vignettes after events
+// ============================================================
+const Sentiment = {
+  recentEvents: [],
+  intervalId: null,
+
+  start(state){
+    // Initial mood
+    setTimeout(() => this.add('rcb', SENTIMENT_BY_EVENT.intro[0]), 400);
+    setTimeout(() => this.add('csk', SENTIMENT_BY_EVENT.intro[1]), 900);
+    setTimeout(() => this.add('neutral', SENTIMENT_BY_EVENT.intro[2]), 1500);
+    setTimeout(() => this.add('rcb', SENTIMENT_BY_EVENT.intro[3]), 2100);
+
+    // Background drip when nothing big is happening
+    this.intervalId = setInterval(() => {
+      if (!state.isPlaying) return;
+      const dotMessages = SENTIMENT_BY_EVENT.dot_pressure;
+      const sides = ['rcb', 'csk', 'neutral'];
+      const side = sides[Math.floor(Math.random() * sides.length)];
+      const msg = dotMessages[Math.floor(Math.random() * dotMessages.length)];
+      this.add(side, msg);
+    }, 3500);
+  },
+
+  add(side, text){
+    const feed = document.getElementById('sentiment-feed');
+    if (!feed) return;
+    const msg = document.createElement('div');
+    msg.className = 'sentiment-msg';
+    const userIdx = Math.floor(Math.random() * 9000) + 1000;
+    msg.innerHTML = `
+      <div class="sentiment-avatar ${side}">${side.toUpperCase()[0]}</div>
+      <div class="sentiment-body">
+        <span class="sentiment-from">@fan${userIdx}</span>
+        <span class="sentiment-text">${text}</span>
+      </div>
+    `;
+    feed.appendChild(msg);
+    while (feed.children.length > 6) feed.removeChild(feed.firstChild);
+  },
+
+  // Push event-tied sentiment (called from engine on events)
+  push(ball){
+    let pool;
+    if (ball.type === 'six'){
+      const team = shortTeam(ball.battingTeam).toLowerCase();
+      pool = SENTIMENT_BY_EVENT[`six_${team}`] || SENTIMENT_BY_EVENT.six_rcb;
+      const msg = pool[Math.floor(Math.random() * pool.length)];
+      this.add(team, msg);
+    } else if (ball.type === 'wicket'){
+      const bowlingTeam = (ball.battingTeam === TEAM1 ? TEAM2 : TEAM1);
+      const team = shortTeam(bowlingTeam).toLowerCase();
+      pool = SENTIMENT_BY_EVENT[`wicket_${team}`] || SENTIMENT_BY_EVENT.wicket_neutral;
+      const msg = pool[Math.floor(Math.random() * pool.length)];
+      this.add(team, msg);
+      // Sometimes a neutral observer chimes in too
+      if (Math.random() > 0.5){
+        const n = SENTIMENT_BY_EVENT.wicket_neutral[Math.floor(Math.random() * SENTIMENT_BY_EVENT.wicket_neutral.length)];
+        setTimeout(() => this.add('neutral', n), 800);
+      }
+    } else if (ball.type === 'four'){
+      const team = shortTeam(ball.battingTeam).toLowerCase();
+      pool = SENTIMENT_BY_EVENT[`four_${team}`] || SENTIMENT_BY_EVENT.four_rcb;
+      const msg = pool[Math.floor(Math.random() * pool.length)];
+      this.add(team, msg);
+    }
+  }
+};
+
+// ============================================================
+// FEED (commentary line + ball strip)
+// ============================================================
+function generateCommentary(ball){
+  if (ball.type === 'six') return `${ball.batter} <em>launches it.</em> Stunning hit off ${ball.bowler}.`;
+  if (ball.type === 'four') return `${ball.batter} threads it through the gap. Pure timing.`;
+  if (ball.type === 'wicket') return `<strong>${ball.bowler}</strong> strikes. ${ball.playerOut} ${ball.wicketKind}.`;
+  if (ball.type === 'dot') return `Dot ball. ${ball.bowler} keeps it tight.`;
+  return `${ball.runs} run${ball.runs > 1 ? 's' : ''} for ${ball.batter}.`;
+}
+
+function updateFeed(ball){
+  let chipClass = '', chipText = ball.runs;
+  if (ball.type === 'six'){ chipClass='six'; chipText='6'; }
+  else if (ball.type === 'four'){ chipClass='four'; chipText='4'; }
+  else if (ball.type === 'wicket'){ chipClass='wicket'; chipText='W'; }
+  else if (ball.type === 'dot'){ chipText='·'; }
+
+  document.getElementById('feed-current').innerHTML =
+    `<span class="feed-ball ${chipClass}">${chipText}</span>${generateCommentary(ball)}`;
+
+  document.getElementById('feed-ball-meta').textContent = `${ball.over}.${ball.ball}`;
+
+  // Strip
+  const strip = document.getElementById('feed-strip');
+  const chip = document.createElement('div');
+  chip.className = `feed-chip c${chipText}`;
+  chip.textContent = chipText;
+  strip.appendChild(chip);
+  strip.scrollLeft = strip.scrollWidth;
+}
+
+// ============================================================
+// SCOREBOARD update
+// ============================================================
+function updateScoreboard(state, ball){
+  const battingShort = shortTeam(ball.battingTeam);
+  const bowlingTeam = (ball.battingTeam === TEAM1) ? TEAM2 : TEAM1;
+  const bowlingShort = shortTeam(bowlingTeam);
+
+  document.getElementById('sb-bat-name').textContent = battingShort;
+  document.getElementById('sb-bat-score').textContent =
+    `${state.inningsScores[ball.innings].runs}/${state.inningsScores[ball.innings].wkts}`;
+  document.getElementById('sb-bat-overs').textContent = `${ball.over}.${ball.ball} ov`;
+
+  document.getElementById('sb-bowl-name').textContent = bowlingShort;
+  if (ball.innings === 0){
+    document.getElementById('sb-bowl-score').textContent = 'yet to bat';
+    document.getElementById('sb-bowl-overs').textContent = '—';
+  } else {
+    document.getElementById('sb-bowl-score').textContent =
+      `${state.inningsScores[0].runs}/${state.inningsScores[0].wkts}`;
+    document.getElementById('sb-bowl-overs').textContent = '20.0 ov';
+  }
+
+  document.getElementById('sb-meta').textContent =
+    `Live · ${ball.innings === 0 ? '1st' : '2nd'} Innings`;
+}
+
+// ============================================================
+// MAIN: bowl one ball (called from app.js scheduler)
+// ============================================================
+function bowlBall(state){
+  state.ballIdx++;
+  const ball = ALL_BALLS[state.ballIdx];
+  if (!ball) return;
+
+  // Innings change?
+  if (ball.innings !== state.currentInnings){
+    state.currentInnings = ball.innings;
+    state.wp = 50;
+    showToast('Innings break · Second innings begins');
+  }
+
+  // Update score
+  if (ball.type === 'wicket'){
+    state.inningsScores[ball.innings].wkts++;
+  } else {
+    state.inningsScores[ball.innings].runs += parseInt(ball.runs) || 0;
+  }
+  state.balls.push(ball);
+
+  // Update displays
+  updateScoreboard(state, ball);
+  updateFeed(ball);
+  updateWinProbability(state, ball);
+
+  // Presence emotion model
+  Presence.update(ball, state);
+
+  // Sentiment feed
+  Sentiment.push(ball);
+
+  // Bump wave participation on dramatic events
+  if (ball.type === 'six') bumpWave(35);
+  else if (ball.type === 'wicket') bumpWave(42);
+  else if (ball.type === 'four') bumpWave(18);
+
+  // Open the Theatre overlay for key moments (only one open at a time)
+  if (ball.type === 'six' || ball.type === 'wicket'){
+    openTheatre(ball, state);
+  }
+
+  // Co-Captain prompt (at end of over)
+  maybeShowCaptainPrompt(state, ball);
+
+  // Match Director narrative every N balls (once per over)
+  if ((state.ballIdx - Director.lastNarrativeBallIdx) >= CONFIG.DIRECTOR_INTERVAL){
+    Director.lastNarrativeBallIdx = state.ballIdx;
+    generateNarrative(state);
+  }
+}
+
+// ============================================================
+// WIN PROBABILITY (simple model, mainly for narrative context)
+// ============================================================
+function updateWinProbability(state, ball){
+  let delta = 0;
+  if (ball.type === 'six')        delta = 3.5;
+  else if (ball.type === 'wicket')delta = -8;
+  else if (ball.type === 'four')  delta = 2;
+  else if (ball.type === 'dot')   delta = -0.8;
+  else                            delta = (parseInt(ball.runs) || 0) * 0.4;
+
+  state.wp = clamp(state.wp + delta, 15, 85);
+}
+
+/* ============================================================
+   PulsePresence — APP (entry point)
+============================================================ */
+
+const state = {
+  ballIdx: -1,
+  inningsScores: [{ runs: 0, wkts: 0 }, { runs: 0, wkts: 0 }],
+  currentInnings: 0,
+  balls: [],
+  isPlaying: false,
+  speed: CONFIG.DEFAULT_SPEED,
+  wp: 52,
+  userTeam: 'neutral',
+  intervalId: null,
+};
+
+// ============================================================
+// Match loop scheduler
+// ============================================================
+function startTicker(){
+  if (state.intervalId) clearInterval(state.intervalId);
+  state.intervalId = setInterval(() => {
+    if (!state.isPlaying) return;
+    if (state.ballIdx >= ALL_BALLS.length - 1){
+      finishMatch();
+      return;
+    }
+    bowlBall(state);
+  }, state.speed);
+}
+
+function finishMatch(){
+  state.isPlaying = false;
+  clearInterval(state.intervalId);
+  document.getElementById('play-btn').textContent = '▶ REPLAY';
+
+  const f1 = state.inningsScores[0];
+  const f2 = state.inningsScores[1];
+  showToast(`MATCH OVER · ${shortTeam(TEAM1)} ${f1.runs}/${f1.wkts} · ${shortTeam(TEAM2)} ${f2.runs}/${f2.wkts}`);
+
+  // Final narrative beat
+  document.getElementById('director-text').innerHTML =
+    `<em>The match is over.</em> You were here for every ball. Two hundred eyes on one field. <strong>This is presence.</strong>`;
+  document.getElementById('director-chapter').textContent = 'EPILOGUE';
+  document.getElementById('director-emotion').textContent = 'CATHARSIS';
+}
+
+// ============================================================
+// Enter the stadium (intro CTA)
+// ============================================================
+function enterStadium(){
+  document.getElementById('intro').classList.add('hide');
+  setTimeout(() => {
+    state.isPlaying = true;
+    document.getElementById('play-btn').textContent = '⏸ PAUSE';
+    Sentiment.start(state);
+    Presence.animate();
+    initWave();
+
+    // Opening narrative
+    generateNarrative(state);
+
+    // Start ticking
+    startTicker();
+
+    showToast('You are in.');
+  }, 800);
+}
+
+// ============================================================
+// Wire events
+// ============================================================
+function wireEvents(){
+  // Play/pause
+  document.getElementById('play-btn').addEventListener('click', () => {
+    state.isPlaying = !state.isPlaying;
+    document.getElementById('play-btn').textContent = state.isPlaying ? '⏸ PAUSE' : '▶ PLAY';
+  });
+
+  // Speed
+  document.querySelectorAll('.speed-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.speed = parseInt(btn.dataset.speed);
+      startTicker(); // restart with new interval
+    });
+  });
+
+  // Team picker
+  document.querySelectorAll('.team-pick-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.team-pick-btn').forEach(b => b.classList.remove('picked'));
+      btn.classList.add('picked');
+      state.userTeam = btn.dataset.team;
+      document.getElementById('director-team').textContent = state.userTeam.toUpperCase();
+      // Enable CTA
+      document.getElementById('intro-cta').disabled = false;
+    });
+  });
+
+  // Ask the director (Enter to send)
+  document.getElementById('ask-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') askDirector();
+  });
+
+  // Initialize theatre reactions
+  initTheatre();
+}
+
+// ============================================================
+// Toast helper
+// ============================================================
+function showToast(text){
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ============================================================
+// Load match data
+// ============================================================
+async function loadMatch(){
+  MATCH_DATA_RAW = {
+  "meta": {
+    "data_version": "1.1.0",
+    "created": "2024-05-19",
+    "revision": 1,
+    "source": "Cricsheet-format (educational replay for PulseIPL demo)"
+  },
+  "info": {
+    "balls_per_over": 6,
+    "city": "Bengaluru",
+    "dates": ["2024-05-18"],
+    "event": {
+      "name": "Indian Premier League",
+      "match_number": 68,
+      "season": "2024"
+    },
+    "gender": "male",
+    "match_type": "T20",
+    "outcome": {
+      "winner": "Royal Challengers Bengaluru",
+      "by": { "wickets": 27, "runs_basis": true }
+    },
+    "overs": 20,
+    "player_of_match": ["V Kohli"],
+    "teams": ["Royal Challengers Bengaluru", "Chennai Super Kings"],
+    "toss": { "decision": "field", "winner": "Royal Challengers Bengaluru" },
+    "venue": "M Chinnaswamy Stadium, Bengaluru"
+  },
+  "innings": [
+    {
+      "team": "Chennai Super Kings",
+      "overs": [
+        {
+          "over": 0,
+          "deliveries": [
+            { "batter": "RD Gaikwad", "bowler": "Yash Dayal", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "AM Rahane", "bowler": "Yash Dayal", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "AM Rahane", "bowler": "Yash Dayal", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "AM Rahane", "bowler": "Yash Dayal", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "Yash Dayal", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "RD Gaikwad", "bowler": "Yash Dayal", "runs": { "batter": 6, "extras": 0, "total": 6 } }
+          ]
+        },
+        {
+          "over": 1,
+          "deliveries": [
+            { "batter": "AM Rahane", "bowler": "M Siraj", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "AM Rahane", "bowler": "M Siraj", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "M Siraj", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "RD Gaikwad", "bowler": "M Siraj", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "RD Gaikwad", "bowler": "M Siraj", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "RD Gaikwad", "bowler": "M Siraj", "runs": { "batter": 1, "extras": 0, "total": 1 } }
+          ]
+        },
+        {
+          "over": 2,
+          "deliveries": [
+            { "batter": "AM Rahane", "bowler": "Yash Dayal", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "AM Rahane", "bowler": "Yash Dayal", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "Yash Dayal", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "RD Gaikwad", "bowler": "Yash Dayal", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "AM Rahane", "bowler": "Yash Dayal", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "AM Rahane", "bowler": "Yash Dayal", "runs": { "batter": 2, "extras": 0, "total": 2 } }
+          ]
+        },
+        {
+          "over": 3,
+          "deliveries": [
+            { "batter": "RD Gaikwad", "bowler": "Mohammed Siraj", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "AM Rahane", "bowler": "Mohammed Siraj", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "AM Rahane", "bowler": "Mohammed Siraj", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "AM Rahane", "bowler": "Mohammed Siraj", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "Mohammed Siraj", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "RD Gaikwad", "bowler": "Mohammed Siraj", "runs": { "batter": 0, "extras": 0, "total": 0 } }
+          ]
+        },
+        {
+          "over": 4,
+          "deliveries": [
+            { "batter": "AM Rahane", "bowler": "Yash Dayal", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "AM Rahane", "bowler": "Yash Dayal", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "Yash Dayal", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "RD Gaikwad", "bowler": "Yash Dayal", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "AM Rahane", "bowler": "Yash Dayal", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "AM Rahane", "bowler": "Yash Dayal", "runs": { "batter": 0, "extras": 0, "total": 0 }, "wickets": [{ "kind": "caught", "player_out": "AM Rahane", "fielders": [{ "name": "V Kohli" }] }] }
+          ]
+        },
+        {
+          "over": 5,
+          "deliveries": [
+            { "batter": "DP Conway", "bowler": "Lockie Ferguson", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "DP Conway", "bowler": "Lockie Ferguson", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "DP Conway", "bowler": "Lockie Ferguson", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "Lockie Ferguson", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "RD Gaikwad", "bowler": "Lockie Ferguson", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "RD Gaikwad", "bowler": "Lockie Ferguson", "runs": { "batter": 1, "extras": 0, "total": 1 } }
+          ]
+        },
+        {
+          "over": 6,
+          "deliveries": [
+            { "batter": "DP Conway", "bowler": "Karn Sharma", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "Karn Sharma", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "RD Gaikwad", "bowler": "Karn Sharma", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "RD Gaikwad", "bowler": "Karn Sharma", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "DP Conway", "bowler": "Karn Sharma", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "DP Conway", "bowler": "Karn Sharma", "runs": { "batter": 4, "extras": 0, "total": 4 } }
+          ]
+        },
+        {
+          "over": 7,
+          "deliveries": [
+            { "batter": "RD Gaikwad", "bowler": "G Maxwell", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "DP Conway", "bowler": "G Maxwell", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "DP Conway", "bowler": "G Maxwell", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "G Maxwell", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "RD Gaikwad", "bowler": "G Maxwell", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "DP Conway", "bowler": "G Maxwell", "runs": { "batter": 0, "extras": 0, "total": 0 }, "wickets": [{ "kind": "lbw", "player_out": "DP Conway" }] }
+          ]
+        },
+        {
+          "over": 8,
+          "deliveries": [
+            { "batter": "S Dube", "bowler": "Karn Sharma", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "Karn Sharma", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "RD Gaikwad", "bowler": "Karn Sharma", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "S Dube", "bowler": "Karn Sharma", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "S Dube", "bowler": "Karn Sharma", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "S Dube", "bowler": "Karn Sharma", "runs": { "batter": 1, "extras": 0, "total": 1 } }
+          ]
+        },
+        {
+          "over": 9,
+          "deliveries": [
+            { "batter": "RD Gaikwad", "bowler": "G Maxwell", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "RD Gaikwad", "bowler": "G Maxwell", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "S Dube", "bowler": "G Maxwell", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "S Dube", "bowler": "G Maxwell", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "G Maxwell", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "RD Gaikwad", "bowler": "G Maxwell", "runs": { "batter": 1, "extras": 0, "total": 1 } }
+          ]
+        },
+        {
+          "over": 10,
+          "deliveries": [
+            { "batter": "S Dube", "bowler": "M Siraj", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "S Dube", "bowler": "M Siraj", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "S Dube", "bowler": "M Siraj", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "M Siraj", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "S Dube", "bowler": "M Siraj", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "S Dube", "bowler": "M Siraj", "runs": { "batter": 0, "extras": 0, "total": 0 } }
+          ]
+        },
+        {
+          "over": 11,
+          "deliveries": [
+            { "batter": "RD Gaikwad", "bowler": "Karn Sharma", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "RD Gaikwad", "bowler": "Karn Sharma", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "S Dube", "bowler": "Karn Sharma", "runs": { "batter": 0, "extras": 0, "total": 0 }, "wickets": [{ "kind": "caught", "player_out": "S Dube" }] },
+            { "batter": "MS Dhoni", "bowler": "Karn Sharma", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "MS Dhoni", "bowler": "Karn Sharma", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "Karn Sharma", "runs": { "batter": 6, "extras": 0, "total": 6 } }
+          ]
+        },
+        {
+          "over": 12,
+          "deliveries": [
+            { "batter": "MS Dhoni", "bowler": "M Siraj", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "MS Dhoni", "bowler": "M Siraj", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "MS Dhoni", "bowler": "M Siraj", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RD Gaikwad", "bowler": "M Siraj", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "MS Dhoni", "bowler": "M Siraj", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "MS Dhoni", "bowler": "M Siraj", "runs": { "batter": 0, "extras": 0, "total": 0 }, "wickets": [{ "kind": "caught", "player_out": "MS Dhoni" }] }
+          ]
+        },
+        {
+          "over": 13,
+          "deliveries": [
+            { "batter": "RD Gaikwad", "bowler": "Lockie Ferguson", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "RD Gaikwad", "bowler": "Lockie Ferguson", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "RD Gaikwad", "bowler": "Lockie Ferguson", "runs": { "batter": 0, "extras": 0, "total": 0 }, "wickets": [{ "kind": "caught", "player_out": "RD Gaikwad" }] }
+          ]
+        }
+      ]
+    },
+    {
+      "team": "Royal Challengers Bengaluru",
+      "overs": [
+        {
+          "over": 0,
+          "deliveries": [
+            { "batter": "F du Plessis", "bowler": "TU Deshpande", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "F du Plessis", "bowler": "TU Deshpande", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "F du Plessis", "bowler": "TU Deshpande", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "V Kohli", "bowler": "TU Deshpande", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "V Kohli", "bowler": "TU Deshpande", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "F du Plessis", "bowler": "TU Deshpande", "runs": { "batter": 4, "extras": 0, "total": 4 } }
+          ]
+        },
+        {
+          "over": 1,
+          "deliveries": [
+            { "batter": "V Kohli", "bowler": "M Pathirana", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "V Kohli", "bowler": "M Pathirana", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "F du Plessis", "bowler": "M Pathirana", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "F du Plessis", "bowler": "M Pathirana", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "V Kohli", "bowler": "M Pathirana", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "V Kohli", "bowler": "M Pathirana", "runs": { "batter": 0, "extras": 0, "total": 0 } }
+          ]
+        },
+        {
+          "over": 2,
+          "deliveries": [
+            { "batter": "F du Plessis", "bowler": "TU Deshpande", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "F du Plessis", "bowler": "TU Deshpande", "runs": { "batter": 0, "extras": 0, "total": 0 }, "wickets": [{ "kind": "caught", "player_out": "F du Plessis", "fielders": [{ "name": "MS Dhoni" }] }] },
+            { "batter": "RM Patidar", "bowler": "TU Deshpande", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "RM Patidar", "bowler": "TU Deshpande", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "RM Patidar", "bowler": "TU Deshpande", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "V Kohli", "bowler": "TU Deshpande", "runs": { "batter": 1, "extras": 0, "total": 1 } }
+          ]
+        },
+        {
+          "over": 3,
+          "deliveries": [
+            { "batter": "V Kohli", "bowler": "RA Jadeja", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RM Patidar", "bowler": "RA Jadeja", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "RM Patidar", "bowler": "RA Jadeja", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "RM Patidar", "bowler": "RA Jadeja", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "RM Patidar", "bowler": "RA Jadeja", "runs": { "batter": 2, "extras": 0, "total": 2 } },
+            { "batter": "RM Patidar", "bowler": "RA Jadeja", "runs": { "batter": 1, "extras": 0, "total": 1 } }
+          ]
+        },
+        {
+          "over": 4,
+          "deliveries": [
+            { "batter": "V Kohli", "bowler": "Mustafizur Rahman", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "V Kohli", "bowler": "Mustafizur Rahman", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "RM Patidar", "bowler": "Mustafizur Rahman", "runs": { "batter": 0, "extras": 0, "total": 0 }, "wickets": [{ "kind": "caught", "player_out": "RM Patidar" }] },
+            { "batter": "G Maxwell", "bowler": "Mustafizur Rahman", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "G Maxwell", "bowler": "Mustafizur Rahman", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "G Maxwell", "bowler": "Mustafizur Rahman", "runs": { "batter": 1, "extras": 0, "total": 1 } }
+          ]
+        },
+        {
+          "over": 5,
+          "deliveries": [
+            { "batter": "V Kohli", "bowler": "RA Jadeja", "runs": { "batter": 4, "extras": 0, "total": 4 } },
+            { "batter": "V Kohli", "bowler": "RA Jadeja", "runs": { "batter": 2, "extras": 0, "total": 2 } },
+            { "batter": "V Kohli", "bowler": "RA Jadeja", "runs": { "batter": 0, "extras": 0, "total": 0 } },
+            { "batter": "V Kohli", "bowler": "RA Jadeja", "runs": { "batter": 6, "extras": 0, "total": 6 } },
+            { "batter": "V Kohli", "bowler": "RA Jadeja", "runs": { "batter": 1, "extras": 0, "total": 1 } },
+            { "batter": "G Maxwell", "bowler": "RA Jadeja", "runs": { "batter": 0, "extras": 0, "total": 0 }, "wickets": [{ "kind": "stumped", "player_out": "G Maxwell", "fielders": [{ "name": "MS Dhoni" }] }] }
+          ]
+        }
+      ]
+    }
+  ]
+}
+;
+
+  ALL_BALLS = parseCricsheet(MATCH_DATA_RAW);
+  TEAM1 = MATCH_DATA_RAW.info.teams[1];  // bats first
+  TEAM2 = MATCH_DATA_RAW.info.teams[0];
+  VENUE = MATCH_DATA_RAW.info.venue;
+
+  // Intro display
+  document.getElementById('intro-match-teams').textContent =
+    `${shortTeam(TEAM2)} vs ${shortTeam(TEAM1)}`;
+  document.getElementById('intro-match-venue').textContent =
+    `${VENUE.split(',')[0].toUpperCase()} · ${MATCH_DATA_RAW.info.dates[0]}`;
+
+  // AI status pill
+  const aiEl = document.getElementById('intro-ai');
+  if (CONFIG.AI_ENABLED){
+    aiEl.className = 'intro-ai on';
+    aiEl.textContent = '✓ AI MATCH DIRECTOR · ONLINE';
+  } else {
+    aiEl.className = 'intro-ai off';
+    aiEl.textContent = '◯ AI OFFLINE · paste OpenAI key in js/config.js';
+    document.getElementById('director-source').textContent = 'SCRIPTED';
+  }
+
+  return true;
+}
+
+// ============================================================
+// Boot
+// ============================================================
+window.addEventListener('DOMContentLoaded', async () => {
+  wireEvents();
+  await loadMatch();
+});
+
+</script>
+</body>
+</html>
