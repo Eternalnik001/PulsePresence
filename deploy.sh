@@ -1,43 +1,37 @@
 #!/bin/bash
-# PulsePresence — GCP Cloud Run Deploy Script
-
 set -e
 
-PROJECT_ID="${GCP_PROJECT_ID:-pulsepresence-demo}"
-REGION="${GCP_REGION:-asia-south1}"
 SERVICE_NAME="pulsepresence"
+REGION="asia-south1"
 
-echo "🏏 PulsePresence — GCP Cloud Run Deployment"
-echo "============================================="
-
-# Read API Key from .env if it exists
 if [ -f .env ]; then
-  export $(cat .env | grep -v '^#' | xargs)
+  export $(grep -v '^#' .env | xargs)
 fi
 
-API_KEY="${OPENAI_API_KEY}"
-
-if [ -z "$API_KEY" ]; then
-  echo "⚠️  OPENAI_API_KEY not found in .env."
-  read -p "Please paste your OpenAI API Key: " API_KEY
-fi
-
-if [ -z "$API_KEY" ]; then
-  echo "Error: API Key is required."
+if [ -z "$GEMINI_API_KEY" ]; then
+  echo "❌ GEMINI_API_KEY not set. Create a .env file or export it."
   exit 1
 fi
 
-echo "🐳 Building & deploying to Cloud Run..."
-gcloud run deploy ${SERVICE_NAME} \
+GEMINI_MODEL_VALUE="${GEMINI_MODEL:-gemini-2.5-pro}"
+
+echo "🏏 Deploying PulsePresence to Cloud Run..."
+echo "   Service: $SERVICE_NAME"
+echo "   Region:  $REGION"
+echo "   Model:   $GEMINI_MODEL_VALUE"
+
+gcloud run deploy "$SERVICE_NAME" \
   --source . \
-  --region ${REGION} \
-  --project ${PROJECT_ID} \
+  --region "$REGION" \
   --allow-unauthenticated \
   --port 8080 \
   --memory 256Mi \
   --cpu 1 \
   --min-instances 0 \
   --max-instances 10 \
-  --set-env-vars="OPENAI_API_KEY=${API_KEY}"
+  --set-env-vars "GEMINI_API_KEY=$GEMINI_API_KEY,GEMINI_MODEL=$GEMINI_MODEL_VALUE" \
+  --quiet
 
-echo "✅ Deployment complete."
+echo ""
+echo "✅ Deployed!"
+gcloud run services describe "$SERVICE_NAME" --region "$REGION" --format='value(status.url)'

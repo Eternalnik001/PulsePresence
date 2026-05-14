@@ -1,0 +1,10 @@
+.git
+.gitignore
+.env
+*.zip
+node_modules
+__pycache__
+*.pyc
+.DS_Store
+pulsepresence-single.html
+FILES.md

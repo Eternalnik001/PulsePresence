@@ -1,6 +1,8 @@
 .env
+.env.local
 .DS_Store
+*.log
 __pycache__/
 *.pyc
-pulsepresence.zip
-pulsepresence-preview.html
+node_modules/
+*.bak

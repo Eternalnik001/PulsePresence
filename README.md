@@ -1,122 +1,92 @@
 # 🏏 PulsePresence
 
-**A second-screen experience for live cricket. Don't watch the match — be inside it.**
+**A cinematic, AI-native second-screen experience for live cricket. Don't just watch the match — be inside it.**
 
-> *Designed for Google Cloud Build with AI · Agentic Premier League — 1st Innings Challenge*
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GCP%20Cloud%20Run-blue?style=for-the-badge&logo=google-cloud)](https://pulsepresence-xgg73naweq-el.a.run.app)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/Eternalnik001/PulsePresence)
+
+> *Built for the Google Cloud "Agentic Premier League" — 1st Innings Challenge*
 
 ---
 
-## 🎯 The Brief
+## 🎯 The Philosophy: Presence > Gamification
 
-> *"Design a system that enhances how users experience live sporting events beyond passive viewing. The solution should create meaningful second-screen interactions during matches, enabling fans to engage with key moments, participate in real-time activities, and feel more connected to the game as it unfolds."*
+Most second-screen apps fail because they treat cricket like a video game (XP, points, leaderboards). **PulsePresence** treats cricket like a *shared emotional history*.
 
-Our reading: **This is not a gamification problem.** It's a *presence* problem. How do you make 80 million people watching alone feel like 80 million people watching together?
-
-**PulsePresence answers with four pillars** — none of them XP, points, or leaderboards.
+We replace "predict the next ball" with **"make the call as Co-Captain"**. We replace "generic emoji chat" with a **"synchronized Stadium Wave"**. We replace "standard commentary" with a **"Personalized AI Match Director"**.
 
 ---
 
 ## 🎨 The Four Pillars
 
-### 1. **AI Match Director** *(personalized live narrative)*
-Powered by **GPT-4o-mini**. The Director knows which team you support, which moments you reacted to, what you've asked about. Every over, it whispers a 1-2 sentence narrative beat — like a film narrator inside your headphones.
+### 1. 🎬 AI Match Director
+Powered by **Google Gemini 1.5/2.0**. The Director tracks your chosen team, the current match "chapter" (Powerplay, Death Overs, etc.), and the global emotional pulse. It whispers 1-2 sentence narrative beats directly to you, providing an intimate, cinematic layer to the broadcast.
 
-> *"You picked Siraj. The captain agreed. The wicket came. You're inside their heads tonight."*
+### 2. ▲ Co-Captain Mode
+Tactical participation, not gambling. Between overs, choose field settings or bowling changes. See what the crowd picked and compare it to the real-world captain's decision as it unfolds.
 
-Match phase tracking: **PROLOGUE → POWERPLAY → MIDDLE OVERS → DEATH OVERS → EPILOGUE**.
-Emotional arc tracking: **ANTICIPATION → HOPEFUL → TENSE → EUPHORIC**.
+### 3. 🌊 Stadium Wave
+Synchronized real-time participation. When viewers hold the orb together, a **coordinated haptic and visual ripple** fires across all connected devices globally. It’s the digital equivalent of being in the stands.
 
-### 2. **Co-Captain Mode** *(tactical participation, not prediction)*
-Between overs, a tactical question appears: *"Dhoni walks in. What does Faf do?"* You vote on bowler change, field setting, or batting approach **before the captain acts**. Then the real decision is revealed, alongside what the crowd voted for.
-
-It's not "predict the runs" (that's gambling). It's **"make the call before the captain does"** (that's co-captaincy).
-
-### 3. **Stadium Wave** *(synchronized real-time participation)*
-**Hold the orb.** Others are holding too. When 50%+ hold together, a wave **ripples across all viewers' phones simultaneously** — coordinated haptic burst, screen ripple, toast notification of "412K phones pulsing."
-
-This is the closest thing to *being in the stadium* that a phone can do.
-
-### 4. **Key Moment Theatre** *(automatic cinematic transformation)*
-When a six is hit or a wicket falls, **the screen auto-transforms**. A full-screen overlay appears with:
-- Giant headline (SIX! / OUT!)
-- AI-generated context about *why this moment matters*
-- 5 reaction emojis to share your feeling
-- A collective sentiment bar showing what 2.4M other fans felt
-
-Not a notification you can ignore. A moment you're *placed inside*.
-
-### Plus: **Collective Pulse** *(4-dimensional emotion meter)*
-Real-time visualization of what the global audience is feeling — **Joy / Tension / Hope / Disbelief** — animated as four parallel bars, with a pulsing globe core. The map of 80 million hearts in one view.
-
-### And: **Ask the Director** *(GPT chat with full match context)*
-"Why did he change the field?" "What's at stake here?" — GPT answers using the live match state, your team affiliation, and recent ball events.
+### 4. ✦ Key Moment Theatre
+Automatic cinematic transformation. When a wicket falls or a six is hit, the UI auto-transforms into a full-screen "Theatre" with AI-generated context, collective sentiment bars, and visceral reactions.
 
 ---
 
-## 🚫 What This is NOT
+## 🏗️ Technical Architecture (Senior Dev View)
 
-| ❌ This is not... | ✅ This is... |
-|---|---|
-| Fantasy cricket (Dream11) | A live emotional layer |
-| A prediction-and-XP game | A presence and tactical engine |
-| A score notification app | An adaptive narrative experience |
-| Generic emoji reactions | Curated moments with AI context |
-| A leaderboard | An intimacy generator |
+PulsePresence is designed for high-concurrency "Flash Events" common in live sports.
 
-**Zero points. Zero streaks. Zero leaderboards. By design.**
+```mermaid
+graph TD
+    User((Fan)) -->|HTTPS| Proxy[Python BFF Proxy]
+    Proxy -->|Serve| SPA[Vanilla JS SPA]
+    Proxy -->|POST /api/chat| Gemini[Google Gemini API]
+    SPA -->|Match State| Engine[PulseEngine.js]
+    Engine -->|4D Emotion| Pulse[Collective Pulse]
+    
+    subgraph "GCP Infrastructure"
+        Proxy
+    end
+    
+    subgraph "AI Layer"
+        Gemini
+    end
+```
+
+### Stack & Security
+- **Frontend**: Vanilla JS (ES6+), CSS Grid/Flex, zero-dependency SPA.
+- **Backend**: Python 3.11 BFF (Backend-for-Frontend) on **Google Cloud Run**.
+- **AI**: Google Gemini Pro/Flash via the `generativelanguage` API.
+- **Security**: Zero client-side API keys. Authentication and rate-limiting are handled by the Python BFF.
+- **Deployment**: Fully containerized via Docker and deployed to `asia-south1`.
 
 ---
 
-## 🚀 Setup (3 steps)
+## 🚀 Quick Start
 
-### 1. Paste your OpenAI key
-Open `js/config.js`, line 11:
-```js
-OPENAI_API_KEY: "sk-proj-YOUR_KEY_HERE",
-```
+### Local Development
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/Eternalnik001/PulsePresence.git
+   cd PulsePresence
+   ```
+2. Set up your environment:
+   ```bash
+   echo "GEMINI_API_KEY=your_key_here" > .env
+   ```
+3. Run the proxy:
+   ```bash
+   python3 proxy.py
+   # Open http://localhost:8080
+   ```
 
-### 2. Test locally
+### GCP Deployment
+We use a streamlined deployment script for Cloud Run:
 ```bash
-python3 -m http.server 8000
-# Open http://localhost:8000
+./deploy.sh
 ```
-
-### 3. Deploy
-
-**GitHub Pages (free):**
-```bash
-git init && git add . && git commit -m "PulsePresence"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/pulsepresence.git
-git push -u origin main
-```
-Then: **Repo → Settings → Pages → Source: GitHub Actions**
-
-**Google Cloud Storage ($5 credit lasts months):**
-```bash
-gcloud storage buckets create gs://pulsepresence --location=asia-south1
-gcloud storage cp -r . gs://pulsepresence/
-gcloud storage buckets update gs://pulsepresence --web-main-page-suffix=index.html
-gcloud storage buckets add-iam-policy-binding gs://pulsepresence \
-  --member=allUsers --role=roles/storage.objectViewer
-```
-
----
-
-## 🎬 Demo Flow (60 seconds)
-
-1. Open URL → **cinematic intro card** sells the vision
-2. **Pick your team** (RCB / CSK / Neutral) → unlocks the CTA
-3. Click "**Enter the Stadium**" → match begins
-4. **Match Director** narrates the opening: *"Two histories, one night."*
-5. First ball is bowled → presence pulse updates emotion bars
-6. **Six!** → Theatre overlay erupts with AI context + reactions
-7. Between overs → **Co-Captain prompt** appears: *"What's your call?"*
-8. **Hold the wave orb** → counter climbs → ripples fire across screen
-9. **Ask the Director** anything → GPT answers in match context
-10. Bump speed to **8x** → drama in fast-forward
-
-The judges feel: *intimate, cinematic, presence — not a game*.
+*Requires `gcloud` CLI configured.*
 
 ---
 
@@ -124,93 +94,29 @@ The judges feel: *intimate, cinematic, presence — not a game*.
 
 ```
 pulsepresence/
-├── index.html            ← HTML shell
-├── css/
-│   └── styles.css        ← Cinematic broadcast aesthetic
+├── proxy.py              ← Python BFF & Static Server (Cloud Run entry)
+├── Dockerfile            ← Container config
+├── deploy.sh             ← Automated GCP deployment
 ├── js/
-│   ├── config.js         ← 🔑 YOU EDIT THIS (API key)
-│   ├── data.js           ← Match parsing + sentiment/captain content
-│   ├── director.js       ← AI Match Director (GPT)
-│   ├── captain.js        ← Co-Captain decisions
-│   ├── wave.js           ← Stadium Wave mechanic
-│   ├── theatre.js        ← Key Moment overlay
-│   ├── engine.js         ← Match loop + presence model
-│   └── app.js            ← Main entry point
+│   ├── config.js         ← Endpoint & feature flags
+│   ├── director.js       ← AI Narrator (Gemini Integration)
+│   ├── engine.js         ← Match Loop & 4D Emotion Model
+│   ├── wave.js           ← Real-time Orb Mechanic
+│   └── ...               ← Modular Pillars
 ├── data/
-│   └── match.json        ← Real Cricsheet ball-by-ball data
+│   └── match.json        ← Cricsheet-format match data
 └── README.md
 ```
 
 ---
 
-## 🛠️ Tech Stack
-
-- **Pure HTML/CSS/JS** — no framework, no build, runs anywhere
-- **OpenAI GPT-4o-mini** — Match Director + Ask + Key Moment context
-- **Cricsheet JSON** — real IPL ball-by-ball (RCB vs CSK 2024)
-- **Fonts:** Bebas Neue · Playfair Display · Inter · Space Mono
-- **Hosting:** GitHub Pages or GCP Cloud Storage
-- **No backend required** for demo. Adds ~₹1-3 per full match in GPT cost.
-
----
-
-## 💰 Cost at Demo Scale
-
-- GitHub Pages: **₹0**
-- Cricsheet data: **₹0** (open source)
-- GCP Cloud Storage: **~₹5/month** at trickle traffic
-- OpenAI per demo session: **~₹1-3** with gpt-4o-mini
-- **Total:** **~₹3 for the whole competition.**
-
----
-
-## 🏗️ Production Architecture (Roadmap)
-
-```
-                    IPL Data Feed (Opta / Sportradar)
-                              │
-                              ▼
-                  Cloud Pub/Sub: match-events
-                              │
-                ┌─────────────┴────────────────┐
-                ▼                              ▼
-        Event Processor              Vertex AI (Gemini 2.5)
-        (Cloud Run)                  - Match Director narrative
-                                     - Co-Captain decision context
-                                     - Win probability + emotion
-                ▼                              ▼
-        ┌─────────────────────────────────────────┐
-        │   Memorystore (Redis): live match state │
-        └─────────────────────────────────────────┘
-                              │
-                              ▼
-                  WebSocket Gateway (GKE Autopilot)
-                              │
-                              ▼
-              Clients (Flutter mobile + web + smart TV)
-```
-
-**Stadium Wave at scale:** Use Redis INCR for participation count, BroadcastChannel for sync, Cloud CDN for the ripple animation assets. Threshold trigger is a Redis pub/sub event that fan-outs to all WebSocket connections.
-
-**Synchronized broadcast delay handling:** Each client calibrates its broadcast delay on join (audio fingerprint of crowd noise vs reference). Theatre overlays trigger on `event_time_at_stadium + user_delay_offset`. This means a TV viewer in Bangalore and a JioCinema viewer in Delhi see the Theatre overlay at the *same moment* relative to *their* stream.
-
----
-
-## 🎯 Why This Wins Challenge 1
-
-| Challenge requirement | How PulsePresence solves it |
-|---|---|
-| "Beyond passive viewing" | Auto-transforming Theatre on every key moment |
-| "Meaningful second-screen interactions" | 4 distinct interaction modes, all match-tied |
-| "Engage with key moments" | Theatre overlay + AI context + collective reactions |
-| "Participate in real-time activities" | Co-Captain decisions + Stadium Wave |
-| "Feel more connected to the game" | Personalized AI Match Director, knows YOU |
-| "As it unfolds" | All four pillars triggered by live match state |
-
-Every feature traces back to a clause in the brief. Nothing is decoration.
+## 🛠️ Roadmap
+- **Live WebSocket Sync**: Moving from simulation to real-time Opta/Sportradar feeds.
+- **Vertex AI Integration**: Utilizing Vertex for managed AI pipelines and fine-tuned narrative models.
+- **Multi-Viewer "Suites"**: Private emotional synchronization for friend groups.
 
 ---
 
 *Don't watch the match. Be inside it.*
 
-**PulsePresence**
+**PulsePresence** | 2024

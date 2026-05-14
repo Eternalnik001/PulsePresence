@@ -68,22 +68,18 @@ const Director = {
 };
 
 // ============================================================
-// GPT caller (same pattern as v1, isolated here)
+// Proxy caller (calls local Python BFF)
 // ============================================================
-async function callGPT(systemPrompt, userPrompt, maxTokens = 100){
+async function callGPT(systemPrompt, userPrompt, maxTokens = 200){
   if (!CONFIG.AI_ENABLED) return null;
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), CONFIG.AI_TIMEOUT_MS);
 
-    const res = await fetch(CONFIG.GPT_API_URL, {
+    const res = await fetch(CONFIG.CHAT_API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + CONFIG.OPENAI_API_KEY
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: CONFIG.GPT_MODEL,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: userPrompt }
@@ -94,15 +90,18 @@ async function callGPT(systemPrompt, userPrompt, maxTokens = 100){
       signal: controller.signal
     });
     clearTimeout(timeoutId);
-    if (!res.ok) throw new Error('GPT ' + res.status);
+
+    if (!res.ok) throw new Error('Proxy returned ' + res.status);
     const data = await res.json();
-    let text = data.choices[0].message.content.trim();
-    // Convert markdown bold/italic to HTML (GPT sometimes ignores HTML instructions)
+    if (data.error) throw new Error(data.error);
+    
+    let text = data.content || "";
+    // Convert markdown bold/italic to HTML for cinematic styling
     text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
     return text;
   } catch (e) {
-    console.warn('GPT failed:', e.message);
+    console.warn('AI call failed:', e.message);
     return null;
   }
 }
@@ -156,14 +155,14 @@ Examples of tone:
     const result = await callGPT(sys, ctx, 90);
     if (result){
       textEl.innerHTML = result;
-      document.getElementById('director-source').textContent = 'GPT';
+      document.getElementById('director-source').textContent = 'GEMINI';
       return;
     }
   }
 
   // Fallback
   textEl.innerHTML = Director.fallbackNarrative(state);
-  document.getElementById('director-source').textContent = CONFIG.AI_ENABLED ? 'GPT·FB' : 'SCRIPTED';
+  document.getElementById('director-source').textContent = CONFIG.AI_ENABLED ? 'GEMINI·FB' : 'SCRIPTED';
 }
 
 // ============================================================
@@ -180,7 +179,7 @@ async function askDirector(){
   Director.userQuestions.push(q);
 
   if (!CONFIG.AI_ENABLED){
-    placeholder.innerHTML = "<em>(AI is offline — paste your OpenAI key in js/config.js to enable me.)</em>";
+    placeholder.innerHTML = "<em>(AI is offline — paste your Gemini key in js/config.js to enable me.)</em>";
     return;
   }
 
